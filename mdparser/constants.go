@@ -6,58 +6,58 @@
 package mdparser
 
 const (
-	TG_USER_ID = `tg://user?id=`
+	tG_USER_ID = `tg://user?id=`
 )
 
 const (
-	CHAR_S1  = '\\'
-	CHAR_S2  = '\''
-	CHAR_S3  = '*'
-	CHAR_S4  = '_'
-	CHAR_S5  = '{'
-	CHAR_S6  = '}'
-	CHAR_S7  = '['
-	CHAR_S8  = ']'
-	CHAR_S9  = '('
-	CHAR_S10 = ')'
-	CHAR_S11 = '#'
-	CHAR_S12 = '+'
-	CHAR_S13 = '-'
-	CHAR_S14 = '.'
-	CHAR_S15 = '!'
-	CHAR_S16 = '`'
-	CHAR_S17 = '.'
-	CHAR_S18 = '='
-	CHAR_S19 = '>'
-	CHAR_S20 = '<'
-	CHAR_S21 = '~'
+	_CHAR_S1  = '\\'
+	_CHAR_S2  = '\''
+	_CHAR_S3  = '*'
+	_CHAR_S4  = '_'
+	_CHAR_S5  = '{'
+	_CHAR_S6  = '}'
+	_CHAR_S7  = '['
+	_CHAR_S8  = ']'
+	_CHAR_S9  = '('
+	_CHAR_S10 = ')'
+	_CHAR_S11 = '#'
+	_CHAR_S12 = '+'
+	_CHAR_S13 = '-'
+	_CHAR_S14 = '.'
+	_CHAR_S15 = '!'
+	_CHAR_S16 = '`'
+	_CHAR_S17 = '.'
+	_CHAR_S18 = '='
+	_CHAR_S19 = '>'
+	_CHAR_S20 = '<'
+	_CHAR_S21 = '~'
 )
 
 var _sChars = []rune{
-	CHAR_S1,
-	CHAR_S2,
-	CHAR_S3,
-	CHAR_S4,
-	CHAR_S5,
-	CHAR_S6,
-	CHAR_S7,
-	CHAR_S8,
-	CHAR_S9,
-	CHAR_S10,
-	CHAR_S11,
-	CHAR_S12,
-	CHAR_S13,
-	CHAR_S14,
-	CHAR_S15,
-	CHAR_S16,
-	CHAR_S17,
-	CHAR_S18,
-	CHAR_S19,
-	CHAR_S20,
-	CHAR_S21,
+	_CHAR_S1,
+	_CHAR_S2,
+	_CHAR_S3,
+	_CHAR_S4,
+	_CHAR_S5,
+	_CHAR_S6,
+	_CHAR_S7,
+	_CHAR_S8,
+	_CHAR_S9,
+	_CHAR_S10,
+	_CHAR_S11,
+	_CHAR_S12,
+	_CHAR_S13,
+	_CHAR_S14,
+	_CHAR_S15,
+	_CHAR_S16,
+	_CHAR_S17,
+	_CHAR_S18,
+	_CHAR_S19,
+	_CHAR_S20,
+	_CHAR_S21,
 }
 
 const (
-	BaseTen      = 10
-	BaseTwoIndex = 2
+	baseTen      = 10
+	baseTwoIndex = 2
 )

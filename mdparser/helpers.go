@@ -8,17 +8,17 @@ package mdparser
 import (
 	"strconv"
 
-	"github.com/ALiwoto/StrongStringGo/strongStringGo"
+	ws "github.com/ALiwoto/StrongStringGo/strongStringGo"
 )
 
 func GetEmpty() WMarkDown {
 	return &wotoMarkDown{
-		_value: strongStringGo.EMPTY,
+		_value: ws.EMPTY,
 	}
 }
 
 func GetNormal(value string) WMarkDown {
-	if strongStringGo.IsEmpty(&value) {
+	if ws.IsEmpty(&value) {
 		return GetEmpty()
 	}
 
@@ -30,7 +30,7 @@ func toNormal(value string) string {
 }
 
 func GetBold(value string) WMarkDown {
-	if strongStringGo.IsEmpty(&value) {
+	if ws.IsEmpty(&value) {
 		return GetEmpty()
 	}
 
@@ -38,12 +38,12 @@ func GetBold(value string) WMarkDown {
 }
 
 func toBold(value string) string {
-	return string(CHAR_S3) + repairValue(value) +
-		string(CHAR_S3)
+	return string(_CHAR_S3) + repairValue(value) +
+		string(_CHAR_S3)
 }
 
 func GetItalic(value string) WMarkDown {
-	if strongStringGo.IsEmpty(&value) {
+	if ws.IsEmpty(&value) {
 		return GetEmpty()
 	}
 
@@ -51,11 +51,11 @@ func GetItalic(value string) WMarkDown {
 }
 
 func toItalic(value string) string {
-	return string(CHAR_S4) + repairValue(value) + string(CHAR_S4)
+	return string(_CHAR_S4) + repairValue(value) + string(_CHAR_S4)
 }
 
 func GetMono(value string) WMarkDown {
-	if strongStringGo.IsEmpty(&value) {
+	if ws.IsEmpty(&value) {
 		return GetEmpty()
 	}
 
@@ -63,12 +63,12 @@ func GetMono(value string) WMarkDown {
 }
 
 func toMono(value string) string {
-	return string(CHAR_S16) + repairValue(value) +
-		string(CHAR_S16)
+	return string(_CHAR_S16) + repairValue(value) +
+		string(_CHAR_S16)
 }
 
 func GetHyperLink(text string, url string) WMarkDown {
-	if strongStringGo.IsEmpty(&text) {
+	if ws.IsEmpty(&text) {
 		return GetEmpty()
 	}
 
@@ -78,8 +78,8 @@ func GetHyperLink(text string, url string) WMarkDown {
 func toHyperLink(text, url string) string {
 	fText := repairValue(text)
 	fUrl := repairValue(url)
-	return string(CHAR_S7) + fText + string(CHAR_S8) +
-		string(CHAR_S9) + fUrl + string(CHAR_S10)
+	return string(_CHAR_S7) + fText + string(_CHAR_S8) +
+		string(_CHAR_S9) + fUrl + string(_CHAR_S10)
 }
 
 // GetUserMention will give you a mentioning style username with the
@@ -87,11 +87,11 @@ func toHyperLink(text, url string) string {
 // WARNING: you don't need to repair text before sending it as first arg,
 // this function will check it itself.
 func GetUserMention(text string, userID int64) WMarkDown {
-	if strongStringGo.IsEmpty(&text) {
+	if ws.IsEmpty(&text) {
 		return GetEmpty()
 	}
 
-	if userID == strongStringGo.BaseIndex {
+	if userID == ws.BaseIndex {
 		return GetMono(text)
 	}
 
@@ -99,11 +99,11 @@ func GetUserMention(text string, userID int64) WMarkDown {
 }
 
 func toUserMention(text string, userID int64) string {
-	return string(CHAR_S7) + repairValue(text) +
-		string(CHAR_S8) +
-		string(CHAR_S9) + TG_USER_ID +
-		strconv.FormatInt(userID, BaseTen) +
-		string(CHAR_S10)
+	return string(_CHAR_S7) + repairValue(text) +
+		string(_CHAR_S8) +
+		string(_CHAR_S9) + tG_USER_ID +
+		strconv.FormatInt(userID, baseTen) +
+		string(_CHAR_S10)
 }
 
 func IsSpecial(r rune) bool {
@@ -116,7 +116,7 @@ func IsSpecial(r rune) bool {
 }
 
 func toWotoMD(value string) WMarkDown {
-	if strongStringGo.IsEmpty(&value) {
+	if ws.IsEmpty(&value) {
 		return nil
 	}
 
@@ -126,40 +126,13 @@ func toWotoMD(value string) WMarkDown {
 }
 
 func repairValue(value string) string {
-	finally := strongStringGo.EMPTY
-	escape := false
-	lasEscape := false
-	escapeCount := strongStringGo.BaseIndex
-	for i, current := range value {
-		escape = (current == CHAR_S1)
+	finally := ws.EMPTY
+	for _, current := range value {
 		if IsSpecial(current) {
-			if escape {
-				escapeCount++
-			} else {
-				escapeCount = strongStringGo.BaseIndex
-			}
-			if i != strongStringGo.BaseIndex {
-				if !lasEscape {
-					finally += string(CHAR_S1) + string(current)
-				} else {
-					finally += string(current)
-				}
-			} else {
-				finally += string(CHAR_S1) + string(current)
-			}
-		} else {
-			if escapeCount != strongStringGo.BaseIndex {
-				tmpR := escapeCount % BaseTwoIndex
-				if tmpR != strongStringGo.BaseIndex {
-					finally += string(CHAR_S1) + string(current)
-				} else {
-					finally += string(current)
-				}
-			} else {
-				finally += string(current)
-			}
+			finally += string(_CHAR_S1)
 		}
-		lasEscape = escape
+		finally += string(current)
 	}
+
 	return finally
 }
