@@ -1,2 +1,27 @@
 # mdparser
 mdparser for telegram bot API
+
+<hr/>
+
+## How to use
+First you need to get the package:
+`go get -u github.com/ALiwoto/mdparser`
+
+then you can use the package like this:
+
+```go
+import "github.com/ALiwoto/mdparser"
+
+
+
+func sendMessage(Message message) {
+	md := mdparser.GetBold("This is a message").AppendNormal(":\n")
+	md = md.AppendItalic("Italic\n")
+	md = md.AppendMono("Mono space\n")
+	md = md.AppendHyperLink("text", "https://google.com")
+
+	message.Reply(md.ToString(), options{version: "MarkdownV2"})
+}
+
+
+```
