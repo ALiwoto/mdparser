@@ -25,8 +25,10 @@ func (m *wotoMarkDown) Append(v WMarkDown) WMarkDown {
 	return nil
 }
 
-func (m *wotoMarkDown) AppendThis(v WMarkDown) {
+func (m *wotoMarkDown) AppendThis(v WMarkDown) WMarkDown {
 	m.setValue(m.getValue() + v.getValue())
+
+	return m
 }
 
 func (m *wotoMarkDown) ToString() string {
@@ -41,12 +43,14 @@ func (m *wotoMarkDown) AppendNormal(v string) WMarkDown {
 	return toWotoMD(m.getValue() + toNormal(v))
 }
 
-func (m *wotoMarkDown) AppendNormalThis(v string) {
+func (m *wotoMarkDown) AppendNormalThis(v string) WMarkDown {
 	if strongStringGo.IsEmpty(&v) {
-		return
+		return m
 	}
 
 	m.setValue(m.getValue() + toNormal(v))
+
+	return m
 }
 
 func (m *wotoMarkDown) AppendBold(v string) WMarkDown {
@@ -57,12 +61,14 @@ func (m *wotoMarkDown) AppendBold(v string) WMarkDown {
 	return toWotoMD(m.getValue() + toBold(v))
 }
 
-func (m *wotoMarkDown) AppendBoldThis(v string) {
+func (m *wotoMarkDown) AppendBoldThis(v string) WMarkDown {
 	if strongStringGo.IsEmpty(&v) {
-		return
+		return m
 	}
 
 	m.setValue(m.getValue() + toBold(v))
+
+	return m
 }
 
 func (m *wotoMarkDown) AppendItalic(v string) WMarkDown {
@@ -73,12 +79,14 @@ func (m *wotoMarkDown) AppendItalic(v string) WMarkDown {
 	return toWotoMD(m.getValue() + toItalic(v))
 }
 
-func (m *wotoMarkDown) AppendItalicThis(v string) {
+func (m *wotoMarkDown) AppendItalicThis(v string) WMarkDown {
 	if strongStringGo.IsEmpty(&v) {
-		return
+		return m
 	}
 
 	m.setValue(m.getValue() + toItalic(v))
+
+	return m
 }
 
 func (m *wotoMarkDown) AppendMono(v string) WMarkDown {
@@ -89,12 +97,14 @@ func (m *wotoMarkDown) AppendMono(v string) WMarkDown {
 	return toWotoMD(m.getValue() + toMono(v))
 }
 
-func (m *wotoMarkDown) AppendMonoThis(v string) {
+func (m *wotoMarkDown) AppendMonoThis(v string) WMarkDown {
 	if strongStringGo.IsEmpty(&v) {
-		return
+		return m
 	}
 
 	m.setValue(m.getValue() + toMono(v))
+
+	return m
 }
 
 func (m *wotoMarkDown) AppendHyperLink(text, url string) WMarkDown {
@@ -105,12 +115,14 @@ func (m *wotoMarkDown) AppendHyperLink(text, url string) WMarkDown {
 	return toWotoMD(m.getValue() + toHyperLink(text, url))
 }
 
-func (m *wotoMarkDown) AppendHyperLinkThis(text, url string) {
+func (m *wotoMarkDown) AppendHyperLinkThis(text, url string) WMarkDown {
 	if strongStringGo.IsEmpty(&text) || strongStringGo.IsEmpty(&url) {
-		return
+		return m
 	}
 
 	m.setValue(m.getValue() + toHyperLink(text, url))
+
+	return m
 }
 
 func (m *wotoMarkDown) AppendMention(text string, id int64) WMarkDown {
@@ -121,12 +133,14 @@ func (m *wotoMarkDown) AppendMention(text string, id int64) WMarkDown {
 	return toWotoMD(m.getValue() + toUserMention(text, id))
 }
 
-func (m *wotoMarkDown) AppendMentionThis(text string, id int64) {
+func (m *wotoMarkDown) AppendMentionThis(text string, id int64) WMarkDown {
 	if strongStringGo.IsEmpty(&text) || id == strongStringGo.BaseIndex {
-		return
+		return m
 	}
 
 	m.setValue(m.getValue() + toUserMention(text, id))
+
+	return m
 }
 
 func (m *wotoMarkDown) getValue() string {

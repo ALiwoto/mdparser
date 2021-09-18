@@ -31,6 +31,7 @@ const (
 	_CHAR_S19 = '>'
 	_CHAR_S20 = '<'
 	_CHAR_S21 = '~'
+	_CHAR_S22 = '|'
 )
 
 var _sChars = []rune{
@@ -55,6 +56,7 @@ var _sChars = []rune{
 	_CHAR_S19,
 	_CHAR_S20,
 	_CHAR_S21,
+	_CHAR_S22,
 }
 
 const (
