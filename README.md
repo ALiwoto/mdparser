@@ -14,13 +14,13 @@ import "github.com/ALiwoto/mdparser"
 
 
 
-func sendMessage(Message message) {
+func sendMessage(msg Message) {
 	md := mdparser.GetBold("This is a message").AppendNormal(":\n")
 	md = md.AppendItalic("Italic\n")
 	md = md.AppendMono("Mono space\n")
 	md = md.AppendHyperLink("text", "https://google.com")
 
-	message.Reply(md.ToString(), options{version: "MarkdownV2"})
+	msg.Reply(md.ToString(), options{version: "MarkdownV2"})
 }
 
 
