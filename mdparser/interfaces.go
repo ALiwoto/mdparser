@@ -21,6 +21,12 @@ type WMarkDown interface {
 	AppendHyperLinkThis(text, url string) WMarkDown
 	AppendMention(text string, id int64) WMarkDown
 	AppendMentionThis(text string, id int64) WMarkDown
+	El() WMarkDown
+	ElThis() WMarkDown
+	Space() WMarkDown
+	SpaceThis() WMarkDown
+	Tab() WMarkDown
+	TabThis() WMarkDown
 	getValue() string
 	setValue(v string)
 }
