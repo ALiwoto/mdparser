@@ -6,7 +6,7 @@
 package mdparser
 
 const (
-	tG_USER_ID = `tg://user?id=`
+	_TG_USER_ID = `tg://user?id=`
 )
 
 const (
@@ -58,8 +58,3 @@ var _sChars = []rune{
 	_CHAR_S21,
 	_CHAR_S22,
 }
-
-const (
-	baseTen      = 10
-	baseTwoIndex = 2
-)

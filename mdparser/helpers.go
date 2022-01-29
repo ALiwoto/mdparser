@@ -6,9 +6,8 @@
 package mdparser
 
 import (
-	"strconv"
-
 	ws "github.com/ALiwoto/StrongStringGo/strongStringGo"
+	"github.com/PaulSonOfLars/gotgbot/v2"
 )
 
 func GetEmpty() WMarkDown {
@@ -17,58 +16,116 @@ func GetEmpty() WMarkDown {
 	}
 }
 
-func GetNormal(value string) WMarkDown {
-	if ws.IsEmpty(&value) {
+func GetNormal(text string) WMarkDown {
+	if text == "" {
 		return GetEmpty()
 	}
 
-	return toWotoMD(toNormal(value))
+	return toWotoMD(toNormal(text))
 }
 
 func toNormal(value string) string {
+	if value == "" {
+		return ""
+	}
+
 	return repairValue(value)
 }
 
-func GetBold(value string) WMarkDown {
-	if ws.IsEmpty(&value) {
+func GetBold(text string) WMarkDown {
+	if text == "" {
 		return GetEmpty()
 	}
 
-	return toWotoMD(toBold(value))
+	return toWotoMD(toBold(text))
 }
 
 func toBold(value string) string {
-	return string(_CHAR_S3) + repairValue(value) +
-		string(_CHAR_S3)
+	if value == "" {
+		return ""
+	}
+
+	return "*" + repairValue(value) + "*"
 }
 
-func GetItalic(value string) WMarkDown {
-	if ws.IsEmpty(&value) {
+func GetItalic(text string) WMarkDown {
+	if text == "" {
 		return GetEmpty()
 	}
 
-	return toWotoMD(toItalic(value))
+	return toWotoMD(toItalic(text))
 }
 
 func toItalic(value string) string {
-	return string(_CHAR_S4) + repairValue(value) + string(_CHAR_S4)
+	return "_" + repairValue(value) + "_"
 }
 
-func GetMono(value string) WMarkDown {
-	if ws.IsEmpty(&value) {
+func GetMono(text string) WMarkDown {
+	if text == "" {
 		return GetEmpty()
 	}
 
-	return toWotoMD(toMono(value))
+	return toWotoMD(toMono(text))
 }
 
 func toMono(value string) string {
-	return string(_CHAR_S16) + repairValue(value) +
-		string(_CHAR_S16)
+	if value == "" {
+		return ""
+	}
+
+	return "`" + repairValue(value) + "`"
+}
+
+func GetSpoiler(text string) WMarkDown {
+	if text == "" {
+		return GetEmpty()
+	}
+
+	return toWotoMD(toSpoiler(text))
+}
+
+func toSpoiler(value string) string {
+	if value == "" {
+		return ""
+	}
+
+	return "||" + repairValue(value) + "||"
+}
+
+func GetUnderline(text string) WMarkDown {
+	if text == "" {
+		return GetEmpty()
+	}
+
+	return toWotoMD(toUnderline(text))
+}
+
+func toUnderline(value string) string {
+	if value == "" {
+		return ""
+	}
+
+	return "__" + repairValue(value) + "__"
+}
+
+func GetStrike(text string) WMarkDown {
+	if text == "" {
+		return GetEmpty()
+	}
+
+	return toWotoMD(toStrike(text))
+}
+
+func toStrike(value string) string {
+	if value == "" {
+		return ""
+	}
+
+	return "~" + repairValue(value) + "~"
 }
 
 func GetHyperLink(text string, url string) WMarkDown {
-	if ws.IsEmpty(&text) {
+	if text == "" {
 		return GetEmpty()
 	}
 
@@ -78,8 +135,7 @@ func GetHyperLink(text string, url string) WMarkDown {
 func toHyperLink(text, url string) string {
 	fText := repairValue(text)
 	fUrl := repairValue(url)
-	return string(_CHAR_S7) + fText + string(_CHAR_S8) +
-		string(_CHAR_S9) + fUrl + string(_CHAR_S10)
+	return "[" + fText + "]" + "(" + fUrl + ")"
 }
 
 // GetUserMention will give you a mentioning style username with the
@@ -87,7 +143,7 @@ func toHyperLink(text, url string) string {
 // WARNING: you don't need to repair text before sending it as first arg,
 // this function will check it itself.
 func GetUserMention(text string, userID int64) WMarkDown {
-	if ws.IsEmpty(&text) {
+	if text == "" {
 		return GetEmpty()
 	}
 
@@ -98,12 +154,8 @@ func GetUserMention(text string, userID int64) WMarkDown {
 	return toWotoMD(toUserMention(text, userID))
 }
 
-func toUserMention(text string, userID int64) string {
-	return string(_CHAR_S7) + repairValue(text) +
-		string(_CHAR_S8) +
-		string(_CHAR_S9) + tG_USER_ID +
-		strconv.FormatInt(userID, baseTen) +
-		string(_CHAR_S10)
+func toUserMention(text string, id int64) string {
+	return "[" + repairValue(text) + "]" + "(" + _TG_USER_ID + ws.ToBase10(id) + ")"
 }
 
 func IsSpecial(r rune) bool {
@@ -115,13 +167,62 @@ func IsSpecial(r rune) bool {
 	return false
 }
 
-func toWotoMD(value string) WMarkDown {
-	if ws.IsEmpty(&value) {
+func ParseFromMessage(message *gotgbot.Message) WMarkDown {
+	w := GetEmpty()
+	if message == nil || len(message.Entities) == 0 {
+		return w
+	}
+
+	for _, current := range message.Entities {
+		switch current.Type {
+		// Type of the entity, can be
+		// "mention" (@username),
+		// "hashtag" (#hashtag),
+		// "cashtag" ($USD),
+		// "bot_command" (/start@jobs_bot),
+		// "url" (https://telegram.org),
+		// "email" (do-not-reply@telegram.org),
+		// "phone_number" (+1-212-555-0123),
+		// "bold" (bold text),
+		// "italic" (italic text),
+		// "underline" (underlined text),
+		// "strikethrough" (strikethrough text),
+		// "spoiler" (spoiler message),
+		// "code" (monowidth string),
+		// "pre" (monowidth block),
+		// "text_link" (for clickable text URLs),
+		// "text_mention" (for users without usernames)
+		case "mention", "hashtag", "cashtag", "bot_command", "url", "email", "phone_number":
+			w.Normal(message.Text[current.Offset : current.Offset+current.Length])
+		case "bold":
+			w.Bold(message.Text[current.Offset : current.Offset+current.Length])
+		case "italic":
+			w.Italic(message.Text[current.Offset : current.Offset+current.Length])
+		case "code", "pre":
+			w.Mono(message.Text[current.Offset : current.Offset+current.Length])
+		case "text_link":
+			w.HyperLink(message.Text[current.Offset:current.Offset+current.Length], current.Url)
+		case "text_mention":
+			w.Mention(message.Text[current.Offset:current.Offset+current.Length], current.User.Id)
+		case "spoiler":
+			w.Spoiler(message.Text[current.Offset : current.Offset+current.Length])
+		case "strikethrough":
+			w.Strike(message.Text[current.Offset : current.Offset+current.Length])
+		case "underline":
+			w.Underline(message.Text[current.Offset : current.Offset+current.Length])
+		}
+	}
+
+	return w
+}
+
+func toWotoMD(text string) WMarkDown {
+	if text == "" {
 		return nil
 	}
 
 	return &wotoMarkDown{
-		_value: value,
+		_value: text,
 	}
 }
 
