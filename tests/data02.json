@@ -1,0 +1,53 @@
+{
+    "message_id": 12583,
+    "from": {
+      "id": 1341091260,
+      "is_bot": false,
+      "first_name": "エイリ・ヲト",
+      "username": "Falling_inside_The_Black",
+      "language_code": "en"
+    },
+    "chat": {
+      "id": -1001394707836,
+      "title": "woto Test.",
+      "type": "supergroup"
+    },
+    "date": 1643444353,
+    "reply_to_message": {
+      "message_id": 12581,
+      "from": {
+        "id": 1341091260,
+        "is_bot": false,
+        "first_name": "エイリ・ヲト",
+        "username": "Falling_inside_The_Black",
+        "language_code": "en"
+      },
+      "chat": {
+        "id": -1001394707836,
+        "title": "woto Test.",
+        "type": "supergroup"
+      },
+      "date": 1643444350,
+      "text": "hello there",
+      "entities": [
+        {
+          "offset": 0,
+          "length": 11,
+          "type": "bold"
+        },
+        {
+          "offset": 0,
+          "length": 11,
+          "type": "italic"
+        }
+      ]
+    },
+    "text": "/json",
+    "entities": [
+      {
+        "offset": 0,
+        "length": 5,
+        "type": "bot_command"
+      }
+    ]
+  }

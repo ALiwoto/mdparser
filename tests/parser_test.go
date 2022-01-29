@@ -45,6 +45,7 @@ func testParseToMd01(t *testing.T, filename string) {
 func TestParseToMd01(t *testing.T) {
 	dataFiles := []string{
 		"data01.json",
+		"data02.json",
 	}
 	for _, current := range dataFiles {
 		testParseToMd01(t, current)
