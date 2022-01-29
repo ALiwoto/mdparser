@@ -162,6 +162,9 @@ func IsSpecial(r rune) bool {
 	return _sChars[r]
 }
 
+// ParseFromMessage will parse the message and return a WMarkDown object.
+// Warning: this function won't work for complicated messages which
+// contains more than one type of md for a specified offset.
 func ParseFromMessage(message *gotgbot.Message) WMarkDown {
 	w := GetEmpty()
 	if message == nil || len(message.Entities) == 0 {

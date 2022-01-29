@@ -244,7 +244,7 @@ func (m *wotoMarkDown) UserMention(text string, id int64) WMarkDown {
 }
 
 func (m *wotoMarkDown) Spoiler(text string) WMarkDown {
-	return nil
+	return m.AppendSpoilerThis(text)
 }
 
 // El method appends a new line (Endline) to the markdown value and returns
