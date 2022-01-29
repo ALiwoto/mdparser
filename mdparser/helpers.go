@@ -159,12 +159,7 @@ func toUserMention(text string, id int64) string {
 }
 
 func IsSpecial(r rune) bool {
-	for _, current := range _sChars {
-		if r == current {
-			return true
-		}
-	}
-	return false
+	return _sChars[r]
 }
 
 func ParseFromMessage(message *gotgbot.Message) WMarkDown {

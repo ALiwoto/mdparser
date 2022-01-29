@@ -11,22 +11,22 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 )
 
-func TestParseToMd01(t *testing.T) {
+func testParseToMd01(t *testing.T, filename string) {
 	m := &gotgbot.Message{}
 	var b []byte
 	var err error
-	b, err = ioutil.ReadFile("tests" + string(os.PathSeparator) + "data01.json")
+	b, err = ioutil.ReadFile("tests" + string(os.PathSeparator) + filename)
 	if err != nil {
-		b, err = ioutil.ReadFile("data01.json")
+		b, err = ioutil.ReadFile(filename)
 		if err != nil {
-			log.Println("Couldn't read data01.json")
+			log.Println("Couldn't read " + filename + ": " + err.Error())
 			return
 		}
 	}
 
 	err = json.Unmarshal(b, m)
 	if err != nil {
-		log.Println("Couldn't unmarshal data01.json")
+		log.Println("Couldn't read " + filename + ": " + err.Error())
 		return
 	}
 
@@ -39,5 +39,14 @@ func TestParseToMd01(t *testing.T) {
 	if strValue == "" {
 		t.Error("strValue is empty")
 		return
+	}
+}
+
+func TestParseToMd01(t *testing.T) {
+	dataFiles := []string{
+		"data01.json",
+	}
+	for _, current := range dataFiles {
+		testParseToMd01(t, current)
 	}
 }
