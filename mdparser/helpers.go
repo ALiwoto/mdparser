@@ -7,7 +7,6 @@ package mdparser
 
 import (
 	ws "github.com/ALiwoto/StrongStringGo/strongStringGo"
-	"github.com/PaulSonOfLars/gotgbot/v2"
 )
 
 func GetEmpty() WMarkDown {
@@ -160,58 +159,6 @@ func toUserMention(text string, id int64) string {
 
 func IsSpecial(r rune) bool {
 	return _sChars[r]
-}
-
-// ParseFromMessage will parse the message and return a WMarkDown object.
-// Warning: this function won't work for complicated messages which
-// contains more than one type of md for a specified offset.
-func ParseFromMessage(message *gotgbot.Message) WMarkDown {
-	w := GetEmpty()
-	if message == nil || len(message.Entities) == 0 {
-		return w
-	}
-
-	for _, current := range message.Entities {
-		switch current.Type {
-		// Type of the entity, can be
-		// "mention" (@username),
-		// "hashtag" (#hashtag),
-		// "cashtag" ($USD),
-		// "bot_command" (/start@jobs_bot),
-		// "url" (https://telegram.org),
-		// "email" (do-not-reply@telegram.org),
-		// "phone_number" (+1-212-555-0123),
-		// "bold" (bold text),
-		// "italic" (italic text),
-		// "underline" (underlined text),
-		// "strikethrough" (strikethrough text),
-		// "spoiler" (spoiler message),
-		// "code" (monowidth string),
-		// "pre" (monowidth block),
-		// "text_link" (for clickable text URLs),
-		// "text_mention" (for users without usernames)
-		case "mention", "hashtag", "cashtag", "bot_command", "url", "email", "phone_number":
-			w.Normal(message.Text[current.Offset : current.Offset+current.Length])
-		case "bold":
-			w.Bold(message.Text[current.Offset : current.Offset+current.Length])
-		case "italic":
-			w.Italic(message.Text[current.Offset : current.Offset+current.Length])
-		case "code", "pre":
-			w.Mono(message.Text[current.Offset : current.Offset+current.Length])
-		case "text_link":
-			w.HyperLink(message.Text[current.Offset:current.Offset+current.Length], current.Url)
-		case "text_mention":
-			w.Mention(message.Text[current.Offset:current.Offset+current.Length], current.User.Id)
-		case "spoiler":
-			w.Spoiler(message.Text[current.Offset : current.Offset+current.Length])
-		case "strikethrough":
-			w.Strike(message.Text[current.Offset : current.Offset+current.Length])
-		case "underline":
-			w.Underline(message.Text[current.Offset : current.Offset+current.Length])
-		}
-	}
-
-	return w
 }
 
 func toWotoMD(text string) WMarkDown {
