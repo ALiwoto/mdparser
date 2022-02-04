@@ -236,7 +236,7 @@ func (m *wotoMarkDown) Link(text, url string) WMarkDown {
 // Mention, mentions a user.
 func (m *wotoMarkDown) Mention(text string, id int64) WMarkDown {
 	return m.AppendMentionThis(text, id)
-} //UserMention
+}
 
 // UserMention, mentions a user.
 func (m *wotoMarkDown) UserMention(text string, id int64) WMarkDown {
