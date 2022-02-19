@@ -1,5 +1,5 @@
 // mdparser library Project
-// Copyright (C) 2021 ALiwoto
+// Copyright (C) 2021-2022 ALiwoto
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE', which is part of the source code.
 
@@ -7,6 +7,7 @@ package mdparser
 
 import (
 	"reflect"
+	"strings"
 
 	"github.com/ALiwoto/StrongStringGo/strongStringGo"
 )
@@ -29,8 +30,42 @@ func (m *wotoMarkDown) Append(v WMarkDown) WMarkDown {
 	return nil
 }
 
+func (m *wotoMarkDown) ReplaceMd(md1, md2 WMarkDown) WMarkDown {
+	return &wotoMarkDown{
+		_value: strings.ReplaceAll(m.getValue(), md1.ToString(), md2.ToString()),
+	}
+}
+
+func (m *wotoMarkDown) ReplaceMdN(md1, md2 WMarkDown, n int) WMarkDown {
+	return &wotoMarkDown{
+		_value: strings.Replace(m.getValue(), md1.ToString(), md2.ToString(), n),
+	}
+}
+
+func (m *wotoMarkDown) ReplaceMdThis(md1, md2 WMarkDown) WMarkDown {
+	m.setValue(strings.ReplaceAll(m.getValue(), md1.ToString(), md2.ToString()))
+	return m
+}
+
+func (m *wotoMarkDown) ReplaceMdThisN(md1, md2 WMarkDown, n int) WMarkDown {
+	m.setValue(strings.Replace(m.getValue(), md1.ToString(), md2.ToString(), n))
+	return m
+}
+
+func (m *wotoMarkDown) ReplaceToNew(text1, text2 string) WMarkDown {
+	return &wotoMarkDown{
+		_value: strings.ReplaceAll(m._value, toNormal(text1), toNormal(text2)),
+	}
+}
+
+func (m *wotoMarkDown) ReplaceToNewN(text1, text2 string, n int) WMarkDown {
+	return &wotoMarkDown{
+		_value: strings.Replace(m._value, toNormal(text1), toNormal(text2), n),
+	}
+}
+
 func (m *wotoMarkDown) AppendThis(v WMarkDown) WMarkDown {
-	m.setValue(m.getValue() + v.getValue())
+	m.setValue(m.getValue() + v.ToString())
 
 	return m
 }
@@ -281,6 +316,16 @@ func (m *wotoMarkDown) Tab() WMarkDown {
 // returns the current instance of WMarkDown.
 func (m *wotoMarkDown) TabThis() WMarkDown {
 	return m.AppendNormalThis("\t")
+}
+
+func (m *wotoMarkDown) Replace(text1, text2 string) WMarkDown {
+	m.setValue(strings.ReplaceAll(m._value, toNormal(text1), toNormal(text2)))
+	return m
+}
+
+func (m *wotoMarkDown) ReplaceN(text1, text2 string, n int) WMarkDown {
+	m.setValue(strings.Replace(m._value, toNormal(text1), toNormal(text2), n))
+	return m
 }
 
 func (m *wotoMarkDown) getValue() string {

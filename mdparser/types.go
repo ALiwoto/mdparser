@@ -1,5 +1,5 @@
 // mdparser library Project
-// Copyright (C) 2021 ALiwoto
+// Copyright (C) 2021-2022 ALiwoto
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE', which is part of the source code.
 
@@ -8,6 +8,10 @@ package mdparser
 type WMarkDown interface {
 	Append(md WMarkDown) WMarkDown
 	AppendThis(md WMarkDown) WMarkDown
+	ReplaceMd(md1, md2 WMarkDown) WMarkDown
+	ReplaceMdN(md1, md2 WMarkDown, n int) WMarkDown
+	ReplaceMdThis(md1, md2 WMarkDown) WMarkDown
+	ReplaceMdThisN(md1, md2 WMarkDown, n int) WMarkDown
 	ToString() string
 
 	AppendNormal(text string) WMarkDown
@@ -26,6 +30,8 @@ type WMarkDown interface {
 	AppendHyperLinkThis(text, url string) WMarkDown
 	AppendMention(text string, id int64) WMarkDown
 	AppendMentionThis(text string, id int64) WMarkDown
+	ReplaceToNew(text1, text2 string) WMarkDown
+	ReplaceToNewN(text1, text2 string, n int) WMarkDown
 
 	Normal(text string) WMarkDown
 	Bold(text string) WMarkDown
@@ -45,8 +51,7 @@ type WMarkDown interface {
 	SpaceThis() WMarkDown
 	Tab() WMarkDown
 	TabThis() WMarkDown
-	getValue() string
-	setValue(text string)
+	Replace(text1, text2 string) WMarkDown
 }
 
 type wotoMarkDown struct {
