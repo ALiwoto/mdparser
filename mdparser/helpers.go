@@ -6,8 +6,66 @@
 package mdparser
 
 import (
+	"strings"
+
 	ws "github.com/ALiwoto/StrongStringGo/strongStringGo"
 )
+
+// AddSecret adds a new secret variable to the mdparser *globally*.
+// from now on, the library itself will automatically censor all of the
+// "value"s with their name.
+// an example of usage would be:
+//  mdparser.AddSecret(bot.Token, "$TOKEN")
+func AddSecret(value, name string) {
+	index := GetSecretIndexByValue(value)
+	if index != -1 {
+		secrets[index].name = name
+		return
+	}
+
+	secrets = append(secrets, secretContainer{
+		value: value,
+		name:  name,
+	})
+}
+
+func RemoveSecretByValue(value string) {
+	index := GetSecretIndexByValue(value)
+	if index != -1 {
+		secrets = append(secrets[:index], secrets[index+1:]...)
+	}
+}
+
+func RemoveSecretByName(name string) {
+	var newSecrets []secretContainer
+	for _, current := range secrets {
+		if current.name != name {
+			newSecrets = append(newSecrets, current)
+		}
+	}
+
+	secrets = newSecrets
+}
+
+func GetSecretIndexByValue(value string) int {
+	for index, current := range secrets {
+		if current.value == value {
+			return index
+		}
+	}
+
+	return -1
+}
+
+func SecretValueExists(value string) bool {
+	for _, current := range secrets {
+		if current.value == value {
+			return true
+		}
+	}
+
+	return false
+}
 
 func GetEmpty() WMarkDown {
 	return &wotoMarkDown{
@@ -172,6 +230,10 @@ func toWotoMD(text string) WMarkDown {
 }
 
 func repairValue(value string) string {
+	if len(secrets) != 0 {
+		value = checkSecrets(value)
+	}
+
 	finally := ws.EMPTY
 	for _, current := range value {
 		if IsSpecial(current) {
@@ -181,4 +243,12 @@ func repairValue(value string) string {
 	}
 
 	return finally
+}
+
+func checkSecrets(value string) string {
+	for _, current := range secrets {
+		value = strings.ReplaceAll(value, current.value, current.name)
+	}
+
+	return value
 }

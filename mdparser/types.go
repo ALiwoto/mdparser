@@ -59,3 +59,10 @@ type WMarkDown interface {
 type wotoMarkDown struct {
 	_value string
 }
+
+// secretContainer contains information about a secret value which needs
+// to be replaced by its name when it's being appended to a markdown value.
+type secretContainer struct {
+	name  string
+	value string
+}
