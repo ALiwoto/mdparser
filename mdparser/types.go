@@ -6,6 +6,8 @@
 package mdparser
 
 type WMarkDown interface {
+	// Append method appends the w-markdown value to a new copy of the current
+	// w-markdown and returns the copy.
 	Append(md WMarkDown) WMarkDown
 	AppendThis(md WMarkDown) WMarkDown
 	ReplaceMd(md1, md2 WMarkDown) WMarkDown

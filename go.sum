@@ -4,5 +4,7 @@ github.com/ALiwoto/StrongStringGo v1.0.10 h1:Zy8pvVWrdtueXFxC4HjU0lyVZbz/F1UtD8I
 github.com/ALiwoto/StrongStringGo v1.0.10/go.mod h1:t7WxtiphnwdgJaq443DSCAw7q+Ut3V8Pg1kT6IcdKmE=
 github.com/ALiwoto/StrongStringGo v1.0.12 h1:CLO2viBuypFlM71khPXlyRwYq6ClBFvLj3so/6TwDmQ=
 github.com/ALiwoto/StrongStringGo v1.0.12/go.mod h1:/DG8OuGgqkTxSPXxFKzz8YihHF57/Fa8JLl6NhXAbbQ=
+github.com/ALiwoto/StrongStringGo v1.0.19 h1:OhiwoMseu7eQ5dMSpRy2Z86AWYHjq79rKE3kxHeuRRw=
+github.com/ALiwoto/StrongStringGo v1.0.19/go.mod h1:TTdQ00xWfw4XTbG49A42DDSAODPsCUi0ZCRPM+/ga1k=
 github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.5 h1:GLCx93Np2zSj+cb9go0uLcYxgSS4gqTYLfv/mC1VERE=
 github.com/PaulSonOfLars/gotgbot/v2 v2.0.0-rc.5/go.mod h1:r815fYWTudnU9JhtsJAxUtuV7QrSgKpChJkfTSMFpfg=
