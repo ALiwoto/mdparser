@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/ALiwoto/StrongStringGo/strongStringGo"
+	"github.com/AnimeKaizoku/ssg/ssg"
 )
 
 func (m *wotoMarkDown) setValue(text string) {
@@ -183,7 +183,7 @@ func (m *wotoMarkDown) AppendStrikeThis(text string) WMarkDown {
 }
 
 func (m *wotoMarkDown) AppendHyperLink(text, url string) WMarkDown {
-	if text == "" || strongStringGo.IsEmpty(&url) {
+	if text == "" || ssg.IsEmpty(&url) {
 		return m
 	}
 
@@ -191,7 +191,7 @@ func (m *wotoMarkDown) AppendHyperLink(text, url string) WMarkDown {
 }
 
 func (m *wotoMarkDown) AppendHyperLinkThis(text, url string) WMarkDown {
-	if text == "" || strongStringGo.IsEmpty(&url) {
+	if text == "" || ssg.IsEmpty(&url) {
 		return m
 	}
 
@@ -201,7 +201,7 @@ func (m *wotoMarkDown) AppendHyperLinkThis(text, url string) WMarkDown {
 }
 
 func (m *wotoMarkDown) AppendMention(text string, id int64) WMarkDown {
-	if text == "" || id == strongStringGo.BaseIndex {
+	if text == "" || id == ssg.BaseIndex {
 		return m
 	}
 
@@ -209,7 +209,7 @@ func (m *wotoMarkDown) AppendMention(text string, id int64) WMarkDown {
 }
 
 func (m *wotoMarkDown) AppendMentionThis(text string, id int64) WMarkDown {
-	if text == "" || id == strongStringGo.BaseIndex {
+	if text == "" || id == ssg.BaseIndex {
 		return m
 	}
 
