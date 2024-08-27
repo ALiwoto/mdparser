@@ -8,7 +8,7 @@ package mdparser
 import (
 	"strings"
 
-	ws "github.com/AnimeKaizoku/ssg/ssg"
+	ws "github.com/ALiwoto/ssg/ssg"
 )
 
 // AddSecret adds a new secret variable to the mdparser *globally*.

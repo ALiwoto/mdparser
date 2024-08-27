@@ -7,6 +7,6 @@ module github.com/ALiwoto/mdparser
 
 go 1.18
 
-require github.com/AnimeKaizoku/ssg v1.1.2
+require github.com/ALiwoto/ssg v1.1.38
 
-require golang.org/x/text v0.3.7 // indirect
+require golang.org/x/text v0.15.0 // indirect

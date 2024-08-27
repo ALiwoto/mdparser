@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/AnimeKaizoku/ssg/ssg"
+	"github.com/ALiwoto/ssg/ssg"
 )
 
 func (m *wotoMarkDown) setValue(text string) {
