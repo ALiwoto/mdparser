@@ -7,6 +7,7 @@ package mdparser
 
 const (
 	baseIndex            = int64(0)
+	markdownCodeFence    = "```"
 	markdownEscapeChar   = '\\'
 	telegramUserIDPrefix = "tg://user?id="
 	specialChars         = "\\'_*{}[]()#+-.!`=><~|"

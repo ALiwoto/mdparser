@@ -77,6 +77,18 @@ func TestRepairValueCensorsSecretsAndEscapesMarkdown(t *testing.T) {
 	}
 }
 
+func TestRepairCodeValueCensorsSecretsAndEscapesCodeFenceChars(t *testing.T) {
+	resetSecrets(t)
+	AddSecret("token-123", "$TOKEN")
+
+	got := repairCodeValue("token-123 `code` \\ path")
+	want := "$TOKEN \\`code\\` \\\\ path"
+
+	if got != want {
+		t.Fatalf("repairCodeValue() = %q, want %q", got, want)
+	}
+}
+
 func TestFormattingConstructors(t *testing.T) {
 	input := "a*b_[c](d)!~|\\"
 	repaired := "a\\*b\\_\\[c\\]\\(d\\)\\!\\~\\|\\\\"
@@ -91,6 +103,7 @@ func TestFormattingConstructors(t *testing.T) {
 		{name: "bold", got: GetBold(input).ToString(), want: "*" + repaired + "*"},
 		{name: "italic", got: GetItalic(input).ToString(), want: "_" + repaired + "_"},
 		{name: "mono", got: GetMono(input).ToString(), want: "`" + repaired + "`"},
+		{name: "code-block", got: GetCodeBlock("fmt.Println(`x`) \\\nnext").ToString(), want: "```\nfmt.Println(\\`x\\`) \\\\\nnext\n```"},
 		{name: "spoiler", got: GetSpoiler(input).ToString(), want: "||" + repaired + "||"},
 		{name: "underline", got: GetUnderline(input).ToString(), want: "__" + repaired + "__"},
 		{name: "strike", got: GetStrike(input).ToString(), want: "~" + repaired + "~"},
@@ -101,6 +114,7 @@ func TestFormattingConstructors(t *testing.T) {
 		{name: "empty-bold", got: GetBold("").ToString(), want: ""},
 		{name: "empty-italic", got: GetItalic("").ToString(), want: ""},
 		{name: "empty-mono", got: GetMono("").ToString(), want: ""},
+		{name: "empty-code-block", got: GetCodeBlock("").ToString(), want: ""},
 		{name: "empty-spoiler", got: GetSpoiler("").ToString(), want: ""},
 		{name: "empty-underline", got: GetUnderline("").ToString(), want: ""},
 		{name: "empty-strike", got: GetStrike("").ToString(), want: ""},
@@ -151,6 +165,7 @@ func TestInternalFormattingHelpersWithEmptyInput(t *testing.T) {
 		{name: "toBold", got: toBold(""), want: ""},
 		{name: "toItalic", got: toItalic(""), want: "__"},
 		{name: "toMono", got: toMono(""), want: ""},
+		{name: "toCodeBlock", got: toCodeBlock(""), want: ""},
 		{name: "toSpoiler", got: toSpoiler(""), want: ""},
 		{name: "toUnderline", got: toUnderline(""), want: ""},
 		{name: "toStrike", got: toStrike(""), want: ""},

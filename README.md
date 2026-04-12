@@ -26,6 +26,7 @@ func sendMessage(msg Message) {
 	md.Normal(":\n")
 	md.Italic("Italic\n")
 	md.Mono("Mono space\n")
+	md.CodeBlock("fmt.Println(\"hello\")")
 	md.HyperLink("text", "https://google.com")
 
 	msg.Reply(md.ToString(), options{version: "MarkdownV2"})

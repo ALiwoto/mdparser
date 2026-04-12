@@ -14,7 +14,8 @@ import (
 // from now on, the library itself will automatically censor all of the
 // "value"s with their name.
 // an example of usage would be:
-//  mdparser.AddSecret(bot.Token, "$TOKEN")
+//
+//	mdparser.AddSecret(bot.Token, "$TOKEN")
 func AddSecret(value, name string) {
 	secretMu.Lock()
 	defer secretMu.Unlock()
@@ -143,6 +144,22 @@ func toMono(value string) string {
 	return "`" + repairValue(value) + "`"
 }
 
+func GetCodeBlock(text string) WMarkDown {
+	if text == "" {
+		return GetEmpty()
+	}
+
+	return toWotoMD(toCodeBlock(text))
+}
+
+func toCodeBlock(value string) string {
+	if value == "" {
+		return ""
+	}
+
+	return markdownCodeFence + "\n" + repairCodeValue(value) + "\n" + markdownCodeFence
+}
+
 func GetSpoiler(text string) WMarkDown {
 	if text == "" {
 		return GetEmpty()
@@ -251,6 +268,26 @@ func repairValue(value string) string {
 
 	for _, current := range value {
 		if IsSpecial(current) {
+			builder.WriteRune(markdownEscapeChar)
+		}
+		builder.WriteRune(current)
+	}
+
+	return builder.String()
+}
+
+func repairCodeValue(value string) string {
+	if value == "" {
+		return ""
+	}
+
+	value = checkSecrets(value)
+
+	var builder strings.Builder
+	builder.Grow(len(value) * 2)
+
+	for _, current := range value {
+		if current == markdownEscapeChar || current == '`' {
 			builder.WriteRune(markdownEscapeChar)
 		}
 		builder.WriteRune(current)

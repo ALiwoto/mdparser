@@ -20,6 +20,7 @@ type WMarkDown interface {
 	Bold(text string) WMarkDown
 	Italic(text string) WMarkDown
 	Mono(text string) WMarkDown
+	CodeBlock(text string) WMarkDown
 	HyperLink(text, url string) WMarkDown
 	Link(text, url string) WMarkDown
 	Mention(text string, id int64) WMarkDown

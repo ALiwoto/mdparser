@@ -57,6 +57,10 @@ func (m *wotoMarkDown) Mono(text string) WMarkDown {
 	return m.appendText(text, toMono)
 }
 
+func (m *wotoMarkDown) CodeBlock(text string) WMarkDown {
+	return m.appendText(text, toCodeBlock)
+}
+
 func (m *wotoMarkDown) Strike(text string) WMarkDown {
 	return m.appendText(text, toStrike)
 }
