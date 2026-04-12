@@ -25,6 +25,7 @@ func sendMessage(msg Message) {
 	md := mdparser.GetBold("This is a message")
 	md.Normal(":\n")
 	md.Italic("Italic\n")
+	md.Styled("Bold + Italic\n", mdparser.StyleBold, mdparser.StyleItalic)
 	md.Mono("Mono space\n")
 	md.CodeBlockLang("go", "fmt.Println(\"hello\")")
 	md.HyperLink("text", "https://google.com")

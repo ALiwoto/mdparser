@@ -130,6 +130,10 @@ func TestFormattingConstructors(t *testing.T) {
 		{name: "bold", got: GetBold(input).ToString(), want: "*" + repaired + "*"},
 		{name: "italic", got: GetItalic(input).ToString(), want: "_" + repaired + "_"},
 		{name: "mono", got: GetMono(input).ToString(), want: "`" + repaired + "`"},
+		{name: "styled-bold-italic", got: GetStyled(input, StyleBold, StyleItalic).ToString(), want: "*_" + repaired + "_*"},
+		{name: "styled-italic-underline", got: GetStyled(input, StyleItalic, StyleUnderline).ToString(), want: "___" + repaired + "_\r__"},
+		{name: "styled-all", got: GetStyled(input, StyleBold, StyleItalic, StyleUnderline, StyleStrike, StyleSpoiler).ToString(), want: "||*~___" + repaired + "_\r__~*||"},
+		{name: "styled-empty-styles", got: GetStyled(input).ToString(), want: repaired},
 		{name: "code-block", got: GetCodeBlock("fmt.Println(`x`) \\\nnext").ToString(), want: "```\nfmt.Println(\\`x\\`) \\\\\nnext\n```"},
 		{name: "code-block-lang", got: GetCodeBlockLang("go", "fmt.Println(`x`)").ToString(), want: "```go\nfmt.Println(\\`x\\`)\n```"},
 		{name: "code-block-lang-empty-lang", got: GetCodeBlockLang("", "fmt.Println(`x`)").ToString(), want: "```\nfmt.Println(\\`x\\`)\n```"},
@@ -209,5 +213,30 @@ func TestInternalFormattingHelpersWithEmptyInput(t *testing.T) {
 				t.Fatalf("%s = %q, want %q", tc.name, tc.got, tc.want)
 			}
 		})
+	}
+}
+
+func TestNormalizeTextStyles(t *testing.T) {
+	got := normalizeTextStyles(StyleBold, StyleItalic, StyleBold, TextStyle(0xff))
+	want := StyleBold | StyleItalic | StyleUnderline | StyleStrike | StyleSpoiler
+
+	if got != want {
+		t.Fatalf("normalizeTextStyles() = %v, want %v", got, want)
+	}
+}
+
+func TestRenderStyledValue(t *testing.T) {
+	got := renderStyledValue("a*b", StyleBold|StyleItalic)
+	want := "*_a\\*b_*"
+
+	if got != want {
+		t.Fatalf("renderStyledValue() = %q, want %q", got, want)
+	}
+
+	got = renderStyledValue("a*b", StyleItalic|StyleUnderline)
+	want = "___a\\*b_\r__"
+
+	if got != want {
+		t.Fatalf("renderStyledValue() italic+underline = %q, want %q", got, want)
 	}
 }

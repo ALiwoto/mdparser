@@ -33,6 +33,8 @@ type WMarkDown interface {
 	Italic(text string) WMarkDown
 	// Mono appends inline code wrapped in single backticks.
 	Mono(text string) WMarkDown
+	// Styled appends text wrapped in one or more nestable text styles.
+	Styled(text string, styles ...TextStyle) WMarkDown
 	// CodeBlock appends a fenced code block.
 	CodeBlock(text string) WMarkDown
 	// CodeBlockLang appends a fenced code block with a language hint.
@@ -64,12 +66,16 @@ type WMarkDown interface {
 	ReplaceN(text1, text2 string, n int) WMarkDown
 }
 
+// TextStyle identifies a nestable Telegram text style.
+type TextStyle uint8
+
 type markdownSegmentKind uint8
 
 type markdownSegment struct {
-	kind markdownSegmentKind
-	text string
-	meta string
+	kind   markdownSegmentKind
+	text   string
+	meta   string
+	styles TextStyle
 }
 
 type wotoMarkDown struct {

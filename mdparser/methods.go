@@ -61,6 +61,14 @@ func (m *wotoMarkDown) Mono(text string) WMarkDown {
 	return m.appendTextSegment(segmentMono, text)
 }
 
+func (m *wotoMarkDown) Styled(text string, styles ...TextStyle) WMarkDown {
+	if text == "" {
+		return m
+	}
+
+	return m.appendSegment(newStyledSegment(text, styles...))
+}
+
 func (m *wotoMarkDown) CodeBlock(text string) WMarkDown {
 	return m.appendTextSegment(segmentCodeBlock, text)
 }

@@ -18,6 +18,7 @@ const (
 	segmentNormal
 	segmentBold
 	segmentItalic
+	segmentStyled
 	segmentMono
 	segmentCodeBlock
 	segmentCodeBlockLang
@@ -27,3 +28,18 @@ const (
 	segmentHyperLink
 	segmentMention
 )
+
+const (
+	// StyleBold applies bold formatting.
+	StyleBold TextStyle = 1 << iota
+	// StyleItalic applies italic formatting.
+	StyleItalic
+	// StyleUnderline applies underline formatting.
+	StyleUnderline
+	// StyleStrike applies strike-through formatting.
+	StyleStrike
+	// StyleSpoiler applies spoiler formatting.
+	StyleSpoiler
+)
+
+const supportedTextStyles = StyleBold | StyleItalic | StyleUnderline | StyleStrike | StyleSpoiler

@@ -144,6 +144,14 @@ func toMono(value string) string {
 	return "`" + repairValue(value) + "`"
 }
 
+func GetStyled(text string, styles ...TextStyle) WMarkDown {
+	if text == "" {
+		return GetEmpty()
+	}
+
+	return newWotoMD(newStyledSegment(text, styles...))
+}
+
 func GetCodeBlock(text string) WMarkDown {
 	if text == "" {
 		return GetEmpty()
@@ -291,6 +299,38 @@ func repairCodeValue(value string) string {
 	return escapeCodeValue(checkSecrets(value))
 }
 
+func renderStyledValue(value string, styles TextStyle) string {
+	value = escapeValue(value)
+	styles = normalizeTextStyles(styles)
+	if styles == 0 {
+		return value
+	}
+
+	if styles&StyleUnderline != 0 && styles&StyleItalic != 0 {
+		value = "___" + value + "_\r__"
+		styles &^= StyleUnderline | StyleItalic
+	} else {
+		if styles&StyleItalic != 0 {
+			value = "_" + value + "_"
+		}
+		if styles&StyleUnderline != 0 {
+			value = "__" + value + "__"
+		}
+	}
+
+	if styles&StyleStrike != 0 {
+		value = "~" + value + "~"
+	}
+	if styles&StyleBold != 0 {
+		value = "*" + value + "*"
+	}
+	if styles&StyleSpoiler != 0 {
+		value = "||" + value + "||"
+	}
+
+	return value
+}
+
 func normalizeCodeLanguage(lang string) string {
 	lang = strings.TrimSpace(lang)
 	if lang == "" {
@@ -370,6 +410,19 @@ func newTextSegment(kind markdownSegmentKind, text string) markdownSegment {
 	}
 }
 
+func newStyledSegment(text string, styles ...TextStyle) markdownSegment {
+	normalized := normalizeTextStyles(styles...)
+	if normalized == 0 {
+		return newTextSegment(segmentNormal, text)
+	}
+
+	return markdownSegment{
+		kind:   segmentStyled,
+		text:   sanitizeValue(text),
+		styles: normalized,
+	}
+}
+
 func newCodeBlockLangSegment(lang, text string) markdownSegment {
 	normalized := normalizeCodeLanguage(lang)
 	if normalized == "" {
@@ -407,6 +460,15 @@ func sanitizeValue(value string) string {
 	return checkSecrets(value)
 }
 
+func normalizeTextStyles(styles ...TextStyle) TextStyle {
+	var normalized TextStyle
+	for _, current := range styles {
+		normalized |= current & supportedTextStyles
+	}
+
+	return normalized
+}
+
 func renderSegments(segments []markdownSegment) string {
 	if len(segments) == 0 {
 		return ""
@@ -438,6 +500,8 @@ func appendRenderedSegment(builder *strings.Builder, segment markdownSegment) {
 		builder.WriteByte('`')
 		builder.WriteString(escapeValue(segment.text))
 		builder.WriteByte('`')
+	case segmentStyled:
+		builder.WriteString(renderStyledValue(segment.text, segment.styles))
 	case segmentCodeBlock:
 		builder.WriteString(markdownCodeFence)
 		builder.WriteByte('\n')
