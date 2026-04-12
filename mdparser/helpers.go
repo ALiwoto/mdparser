@@ -1,5 +1,5 @@
 // mdparser library Project
-// Copyright (C) 2021-2022 ALiwoto
+// Copyright (C) 2021-2026 ALiwoto
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE', which is part of the source code.
 
@@ -245,12 +245,6 @@ func GetHyperLink(text string, url string) WMarkDown {
 	return newWotoMD(newHyperLinkSegment(text, url))
 }
 
-func toHyperLink(text, url string) string {
-	fText := repairValue(text)
-	fUrl := repairValue(url)
-	return "[" + fText + "]" + "(" + fUrl + ")"
-}
-
 // GetUserMention will give you a mentioning style username with the
 // specified text.
 // WARNING: you don't need to repair text before sending it as first arg,
@@ -265,10 +259,6 @@ func GetUserMention(text string, userID int64) WMarkDown {
 	}
 
 	return newWotoMD(newMentionSegment(text, userID))
-}
-
-func toUserMention(text string, id int64) string {
-	return "[" + repairValue(text) + "]" + "(" + telegramUserIDPrefix + strconv.FormatInt(id, 10) + ")"
 }
 
 func IsSpecial(r rune) bool {

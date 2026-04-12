@@ -1,6 +1,6 @@
 <!--
 	mdparser library Project
-	Copyright (C) 2021-2022 ALiwoto
+	Copyright (C) 2021-2026 ALiwoto
 	This file is subject to the terms and conditions defined in
 	file 'LICENSE', which is part of the source code.
 -->
@@ -54,7 +54,7 @@ Telegram officially documents nested message entities in the Bot API docs:
 Important rules from the official docs:
 
 - Nested entities are supported, but if two entities overlap, one must fully contain the other.
-- `bold`, `italic`, `underline`, `strikethrough`, and `spoiler` may be nested in each other.
+- `bold`, `italic`, `underline`, `strike-through`, and `spoiler` may be nested in each other.
 - `code` and `pre` are special and have stricter nesting limits.
 - Legacy `Markdown` is limited; use `MarkdownV2` if you need modern formatting behavior.
 
