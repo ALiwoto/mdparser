@@ -160,6 +160,27 @@ func toCodeBlock(value string) string {
 	return markdownCodeFence + "\n" + repairCodeValue(value) + "\n" + markdownCodeFence
 }
 
+func GetCodeBlockLang(lang, text string) WMarkDown {
+	if text == "" {
+		return GetEmpty()
+	}
+
+	return toWotoMD(toCodeBlockLang(lang, text))
+}
+
+func toCodeBlockLang(lang, value string) string {
+	if value == "" {
+		return ""
+	}
+
+	lang = normalizeCodeLanguage(lang)
+	if lang == "" {
+		return toCodeBlock(value)
+	}
+
+	return markdownCodeFence + lang + "\n" + repairCodeValue(value) + "\n" + markdownCodeFence
+}
+
 func GetSpoiler(text string) WMarkDown {
 	if text == "" {
 		return GetEmpty()
@@ -287,6 +308,27 @@ func repairCodeValue(value string) string {
 	builder.Grow(len(value) * 2)
 
 	for _, current := range value {
+		if current == markdownEscapeChar || current == '`' {
+			builder.WriteRune(markdownEscapeChar)
+		}
+		builder.WriteRune(current)
+	}
+
+	return builder.String()
+}
+
+func normalizeCodeLanguage(lang string) string {
+	lang = strings.TrimSpace(lang)
+	if lang == "" {
+		return ""
+	}
+
+	lang = strings.NewReplacer("\r", "", "\n", "", "\t", "").Replace(lang)
+
+	var builder strings.Builder
+	builder.Grow(len(lang))
+
+	for _, current := range lang {
 		if current == markdownEscapeChar || current == '`' {
 			builder.WriteRune(markdownEscapeChar)
 		}

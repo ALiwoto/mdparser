@@ -89,6 +89,22 @@ func TestRepairCodeValueCensorsSecretsAndEscapesCodeFenceChars(t *testing.T) {
 	}
 }
 
+func TestNormalizeCodeLanguage(t *testing.T) {
+	got := normalizeCodeLanguage("  go\t\r\n")
+	want := "go"
+
+	if got != want {
+		t.Fatalf("normalizeCodeLanguage() = %q, want %q", got, want)
+	}
+
+	got = normalizeCodeLanguage("c`++\\17")
+	want = "c\\`++\\\\17"
+
+	if got != want {
+		t.Fatalf("normalizeCodeLanguage() escaped = %q, want %q", got, want)
+	}
+}
+
 func TestFormattingConstructors(t *testing.T) {
 	input := "a*b_[c](d)!~|\\"
 	repaired := "a\\*b\\_\\[c\\]\\(d\\)\\!\\~\\|\\\\"
@@ -104,6 +120,9 @@ func TestFormattingConstructors(t *testing.T) {
 		{name: "italic", got: GetItalic(input).ToString(), want: "_" + repaired + "_"},
 		{name: "mono", got: GetMono(input).ToString(), want: "`" + repaired + "`"},
 		{name: "code-block", got: GetCodeBlock("fmt.Println(`x`) \\\nnext").ToString(), want: "```\nfmt.Println(\\`x\\`) \\\\\nnext\n```"},
+		{name: "code-block-lang", got: GetCodeBlockLang("go", "fmt.Println(`x`)").ToString(), want: "```go\nfmt.Println(\\`x\\`)\n```"},
+		{name: "code-block-lang-empty-lang", got: GetCodeBlockLang("", "fmt.Println(`x`)").ToString(), want: "```\nfmt.Println(\\`x\\`)\n```"},
+		{name: "code-block-lang-normalized-lang", got: GetCodeBlockLang(" c`++\\17 \n", "code").ToString(), want: "```c\\`++\\\\17\ncode\n```"},
 		{name: "spoiler", got: GetSpoiler(input).ToString(), want: "||" + repaired + "||"},
 		{name: "underline", got: GetUnderline(input).ToString(), want: "__" + repaired + "__"},
 		{name: "strike", got: GetStrike(input).ToString(), want: "~" + repaired + "~"},
@@ -115,6 +134,7 @@ func TestFormattingConstructors(t *testing.T) {
 		{name: "empty-italic", got: GetItalic("").ToString(), want: ""},
 		{name: "empty-mono", got: GetMono("").ToString(), want: ""},
 		{name: "empty-code-block", got: GetCodeBlock("").ToString(), want: ""},
+		{name: "empty-code-block-lang", got: GetCodeBlockLang("go", "").ToString(), want: ""},
 		{name: "empty-spoiler", got: GetSpoiler("").ToString(), want: ""},
 		{name: "empty-underline", got: GetUnderline("").ToString(), want: ""},
 		{name: "empty-strike", got: GetStrike("").ToString(), want: ""},
@@ -166,6 +186,7 @@ func TestInternalFormattingHelpersWithEmptyInput(t *testing.T) {
 		{name: "toItalic", got: toItalic(""), want: "__"},
 		{name: "toMono", got: toMono(""), want: ""},
 		{name: "toCodeBlock", got: toCodeBlock(""), want: ""},
+		{name: "toCodeBlockLang", got: toCodeBlockLang("go", ""), want: ""},
 		{name: "toSpoiler", got: toSpoiler(""), want: ""},
 		{name: "toUnderline", got: toUnderline(""), want: ""},
 		{name: "toStrike", got: toStrike(""), want: ""},

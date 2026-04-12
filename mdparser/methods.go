@@ -61,6 +61,10 @@ func (m *wotoMarkDown) CodeBlock(text string) WMarkDown {
 	return m.appendText(text, toCodeBlock)
 }
 
+func (m *wotoMarkDown) CodeBlockLang(lang, text string) WMarkDown {
+	return m.appendPair(lang, text, toCodeBlockLang)
+}
+
 func (m *wotoMarkDown) Strike(text string) WMarkDown {
 	return m.appendText(text, toStrike)
 }

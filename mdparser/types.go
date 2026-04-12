@@ -5,34 +5,62 @@
 
 package mdparser
 
+// WMarkDown is the mutable markdown builder exposed by this package.
+// Every instance method mutates the current value unless you explicitly
+// call Clone first.
 type WMarkDown interface {
-	// Append method appends the given markdown value to the current markdown.
+	// Append appends another markdown value to the current markdown.
 	Append(md WMarkDown) WMarkDown
+	// Clone returns a copy of the current markdown value.
 	Clone() WMarkDown
+	// ReplaceMd replaces all matching markdown fragments with another markdown value.
 	ReplaceMd(md1, md2 WMarkDown) WMarkDown
+	// ReplaceMdN replaces up to n matching markdown fragments with another markdown value.
 	ReplaceMdN(md1, md2 WMarkDown, n int) WMarkDown
+	// ToString returns the final markdown string.
 	ToString() string
 
+	// ReplaceToNew replaces all matching plain-text fragments with escaped plain-text replacements.
 	ReplaceToNew(text1, text2 string) WMarkDown
+	// ReplaceToNewN replaces up to n matching plain-text fragments with escaped plain-text replacements.
 	ReplaceToNewN(text1, text2 string, n int) WMarkDown
 
+	// Normal appends plain escaped text.
 	Normal(text string) WMarkDown
+	// Bold appends bold markdown text.
 	Bold(text string) WMarkDown
+	// Italic appends italic markdown text.
 	Italic(text string) WMarkDown
+	// Mono appends inline code wrapped in single backticks.
 	Mono(text string) WMarkDown
+	// CodeBlock appends a fenced code block.
 	CodeBlock(text string) WMarkDown
+	// CodeBlockLang appends a fenced code block with a language hint.
+	CodeBlockLang(lang, text string) WMarkDown
+	// HyperLink appends a markdown hyperlink.
 	HyperLink(text, url string) WMarkDown
+	// Link appends a markdown hyperlink.
 	Link(text, url string) WMarkDown
+	// Mention appends a Telegram user mention.
 	Mention(text string, id int64) WMarkDown
+	// UserMention appends a Telegram user mention.
 	UserMention(text string, id int64) WMarkDown
+	// Spoiler appends spoiler markdown.
 	Spoiler(text string) WMarkDown
+	// Strike appends strike-through markdown.
 	Strike(text string) WMarkDown
+	// Underline appends underline markdown.
 	Underline(text string) WMarkDown
 
+	// El appends a newline.
 	El() WMarkDown
+	// Space appends a space.
 	Space() WMarkDown
+	// Tab appends a tab.
 	Tab() WMarkDown
+	// Replace replaces all matching escaped plain-text fragments in the current value.
 	Replace(text1, text2 string) WMarkDown
+	// ReplaceN replaces up to n matching escaped plain-text fragments in the current value.
 	ReplaceN(text1, text2 string, n int) WMarkDown
 }
 
