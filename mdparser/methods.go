@@ -6,66 +6,44 @@
 package mdparser
 
 import (
-	"reflect"
 	"strings"
 )
 
-func (m *wotoMarkDown) setValue(text string) {
-	m._value = text
-}
-
 func (m *wotoMarkDown) Append(v WMarkDown) WMarkDown {
-	if reflect.TypeOf(v) == reflect.TypeOf(m) {
-		md := v.(*wotoMarkDown)
-		str := m._value + md._value
-		wmd := &wotoMarkDown{
-			_value: str,
-		}
-
-		return wmd
+	md, ok := v.(*wotoMarkDown)
+	if !ok {
+		return nil
 	}
 
-	return nil
+	return m.appendRaw(md._value)
 }
 
 func (m *wotoMarkDown) ReplaceMd(md1, md2 WMarkDown) WMarkDown {
-	return &wotoMarkDown{
-		_value: strings.ReplaceAll(m.getValue(), md1.ToString(), md2.ToString()),
-	}
+	return m.replaceRaw(md1.ToString(), md2.ToString(), -1)
 }
 
 func (m *wotoMarkDown) ReplaceMdN(md1, md2 WMarkDown, n int) WMarkDown {
-	return &wotoMarkDown{
-		_value: strings.Replace(m.getValue(), md1.ToString(), md2.ToString(), n),
-	}
+	return m.replaceRaw(md1.ToString(), md2.ToString(), n)
 }
 
 func (m *wotoMarkDown) ReplaceMdThis(md1, md2 WMarkDown) WMarkDown {
-	m.setValue(strings.ReplaceAll(m.getValue(), md1.ToString(), md2.ToString()))
-	return m
+	return m.replaceRawThis(md1.ToString(), md2.ToString(), -1)
 }
 
 func (m *wotoMarkDown) ReplaceMdThisN(md1, md2 WMarkDown, n int) WMarkDown {
-	m.setValue(strings.Replace(m.getValue(), md1.ToString(), md2.ToString(), n))
-	return m
+	return m.replaceRawThis(md1.ToString(), md2.ToString(), n)
 }
 
 func (m *wotoMarkDown) ReplaceToNew(text1, text2 string) WMarkDown {
-	return &wotoMarkDown{
-		_value: strings.ReplaceAll(m._value, toNormal(text1), toNormal(text2)),
-	}
+	return m.replaceRaw(toNormal(text1), toNormal(text2), -1)
 }
 
 func (m *wotoMarkDown) ReplaceToNewN(text1, text2 string, n int) WMarkDown {
-	return &wotoMarkDown{
-		_value: strings.Replace(m._value, toNormal(text1), toNormal(text2), n),
-	}
+	return m.replaceRaw(toNormal(text1), toNormal(text2), n)
 }
 
 func (m *wotoMarkDown) AppendThis(v WMarkDown) WMarkDown {
-	m.setValue(m.getValue() + v.ToString())
-
-	return m
+	return m.appendRawThis(v.ToString())
 }
 
 func (m *wotoMarkDown) ToString() string {
@@ -73,165 +51,75 @@ func (m *wotoMarkDown) ToString() string {
 }
 
 func (m *wotoMarkDown) AppendNormal(text string) WMarkDown {
-	if text == "" {
-		return m
-	}
-
-	return toWotoMD(m.getValue() + toNormal(text))
+	return m.appendText(text, toNormal)
 }
 
 func (m *wotoMarkDown) AppendNormalThis(text string) WMarkDown {
-	if text == "" {
-		return m
-	}
-
-	m.setValue(m.getValue() + toNormal(text))
-
-	return m
+	return m.appendTextThis(text, toNormal)
 }
 
 func (m *wotoMarkDown) AppendBold(text string) WMarkDown {
-	if text == "" {
-		return m
-	}
-
-	return toWotoMD(m.getValue() + toBold(text))
+	return m.appendText(text, toBold)
 }
 
 func (m *wotoMarkDown) AppendBoldThis(text string) WMarkDown {
-	if text == "" {
-		return m
-	}
-
-	m.setValue(m.getValue() + toBold(text))
-
-	return m
+	return m.appendTextThis(text, toBold)
 }
 
 func (m *wotoMarkDown) AppendItalic(text string) WMarkDown {
-	if text == "" {
-		return m
-	}
-
-	return toWotoMD(m.getValue() + toItalic(text))
+	return m.appendText(text, toItalic)
 }
 
 func (m *wotoMarkDown) AppendItalicThis(text string) WMarkDown {
-	if text == "" {
-		return m
-	}
-
-	m.setValue(m.getValue() + toItalic(text))
-
-	return m
+	return m.appendTextThis(text, toItalic)
 }
 
 func (m *wotoMarkDown) AppendMono(text string) WMarkDown {
-	if text == "" {
-		return m
-	}
-
-	return toWotoMD(m.getValue() + toMono(text))
+	return m.appendText(text, toMono)
 }
 
 func (m *wotoMarkDown) AppendMonoThis(text string) WMarkDown {
-	if text == "" {
-		return m
-	}
-
-	m.setValue(m.getValue() + toMono(text))
-
-	return m
+	return m.appendTextThis(text, toMono)
 }
 
 func (m *wotoMarkDown) AppendUnderline(text string) WMarkDown {
-	if text == "" {
-		return m
-	}
-
-	return toWotoMD(m.getValue() + toUnderline(text))
+	return m.appendText(text, toUnderline)
 }
 
 func (m *wotoMarkDown) AppendUnderlineThis(text string) WMarkDown {
-	if text == "" {
-		return m
-	}
-
-	m.setValue(m.getValue() + toUnderline(text))
-
-	return m
+	return m.appendTextThis(text, toUnderline)
 }
 
 func (m *wotoMarkDown) AppendStrike(text string) WMarkDown {
-	if text == "" {
-		return m
-	}
-
-	return toWotoMD(m.getValue() + toStrike(text))
+	return m.appendText(text, toStrike)
 }
 
 func (m *wotoMarkDown) AppendStrikeThis(text string) WMarkDown {
-	if text == "" {
-		return m
-	}
-
-	m.setValue(m.getValue() + toStrike(text))
-
-	return m
+	return m.appendTextThis(text, toStrike)
 }
 
 func (m *wotoMarkDown) AppendHyperLink(text, url string) WMarkDown {
-	if text == "" || url == "" {
-		return m
-	}
-
-	return toWotoMD(m.getValue() + toHyperLink(text, url))
+	return m.appendPair(text, url, toHyperLink)
 }
 
 func (m *wotoMarkDown) AppendHyperLinkThis(text, url string) WMarkDown {
-	if text == "" || url == "" {
-		return m
-	}
-
-	m.setValue(m.getValue() + toHyperLink(text, url))
-
-	return m
+	return m.appendPairThis(text, url, toHyperLink)
 }
 
 func (m *wotoMarkDown) AppendMention(text string, id int64) WMarkDown {
-	if text == "" || id == baseIndex {
-		return m
-	}
-
-	return toWotoMD(m.getValue() + toUserMention(text, id))
+	return m.appendMention(text, id)
 }
 
 func (m *wotoMarkDown) AppendMentionThis(text string, id int64) WMarkDown {
-	if text == "" || id == baseIndex {
-		return m
-	}
-
-	m.setValue(m.getValue() + toUserMention(text, id))
-
-	return m
+	return m.appendMentionThis(text, id)
 }
 
 func (m *wotoMarkDown) AppendSpoiler(text string) WMarkDown {
-	if text == "" {
-		return m
-	}
-
-	return toWotoMD(m.getValue() + toSpoiler(text))
+	return m.appendText(text, toSpoiler)
 }
 
 func (m *wotoMarkDown) AppendSpoilerThis(text string) WMarkDown {
-	if text == "" {
-		return m
-	}
-
-	m.setValue(m.getValue() + toSpoiler(text))
-
-	return m
+	return m.appendTextThis(text, toSpoiler)
 }
 
 func (m *wotoMarkDown) Normal(text string) WMarkDown {
@@ -317,15 +205,77 @@ func (m *wotoMarkDown) TabThis() WMarkDown {
 }
 
 func (m *wotoMarkDown) Replace(text1, text2 string) WMarkDown {
-	m.setValue(strings.ReplaceAll(m._value, toNormal(text1), toNormal(text2)))
-	return m
+	return m.replaceRawThis(toNormal(text1), toNormal(text2), -1)
 }
 
 func (m *wotoMarkDown) ReplaceN(text1, text2 string, n int) WMarkDown {
-	m.setValue(strings.Replace(m._value, toNormal(text1), toNormal(text2), n))
+	return m.replaceRawThis(toNormal(text1), toNormal(text2), n)
+}
+
+func (m *wotoMarkDown) appendRaw(value string) WMarkDown {
+	return &wotoMarkDown{_value: m._value + value}
+}
+
+func (m *wotoMarkDown) appendRawThis(value string) WMarkDown {
+	m._value += value
 	return m
 }
 
-func (m *wotoMarkDown) getValue() string {
-	return m._value
+func (m *wotoMarkDown) appendText(text string, formatter func(string) string) WMarkDown {
+	if text == "" {
+		return m
+	}
+
+	return m.appendRaw(formatter(text))
+}
+
+func (m *wotoMarkDown) appendTextThis(text string, formatter func(string) string) WMarkDown {
+	if text == "" {
+		return m
+	}
+
+	return m.appendRawThis(formatter(text))
+}
+
+func (m *wotoMarkDown) appendPair(text, extra string, formatter func(string, string) string) WMarkDown {
+	if text == "" || extra == "" {
+		return m
+	}
+
+	return m.appendRaw(formatter(text, extra))
+}
+
+func (m *wotoMarkDown) appendPairThis(text, extra string, formatter func(string, string) string) WMarkDown {
+	if text == "" || extra == "" {
+		return m
+	}
+
+	return m.appendRawThis(formatter(text, extra))
+}
+
+func (m *wotoMarkDown) appendMention(text string, id int64) WMarkDown {
+	if text == "" || id == baseIndex {
+		return m
+	}
+
+	return m.appendRaw(toUserMention(text, id))
+}
+
+func (m *wotoMarkDown) appendMentionThis(text string, id int64) WMarkDown {
+	if text == "" || id == baseIndex {
+		return m
+	}
+
+	return m.appendRawThis(toUserMention(text, id))
+}
+
+func (m *wotoMarkDown) replaceRaw(oldValue, newValue string, n int) WMarkDown {
+	return &wotoMarkDown{
+		_value: strings.Replace(m._value, oldValue, newValue, n),
+	}
+}
+
+func (m *wotoMarkDown) replaceRawThis(oldValue, newValue string, n int) WMarkDown {
+	m._value = strings.Replace(m._value, oldValue, newValue, n)
+	return m
 }
