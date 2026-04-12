@@ -10,28 +10,13 @@ type WMarkDown interface {
 	// w-markdown and returns the copy.
 	Append(md WMarkDown) WMarkDown
 	AppendThis(md WMarkDown) WMarkDown
+	Clone() WMarkDown
 	ReplaceMd(md1, md2 WMarkDown) WMarkDown
 	ReplaceMdN(md1, md2 WMarkDown, n int) WMarkDown
 	ReplaceMdThis(md1, md2 WMarkDown) WMarkDown
 	ReplaceMdThisN(md1, md2 WMarkDown, n int) WMarkDown
 	ToString() string
 
-	AppendNormal(text string) WMarkDown
-	AppendNormalThis(text string) WMarkDown
-	AppendBold(text string) WMarkDown
-	AppendBoldThis(text string) WMarkDown
-	AppendItalic(text string) WMarkDown
-	AppendItalicThis(text string) WMarkDown
-	AppendStrike(text string) WMarkDown
-	AppendStrikeThis(text string) WMarkDown
-	AppendMono(text string) WMarkDown
-	AppendMonoThis(text string) WMarkDown
-	AppendUnderline(text string) WMarkDown
-	AppendUnderlineThis(text string) WMarkDown
-	AppendHyperLink(text, url string) WMarkDown
-	AppendHyperLinkThis(text, url string) WMarkDown
-	AppendMention(text string, id int64) WMarkDown
-	AppendMentionThis(text string, id int64) WMarkDown
 	ReplaceToNew(text1, text2 string) WMarkDown
 	ReplaceToNewN(text1, text2 string, n int) WMarkDown
 

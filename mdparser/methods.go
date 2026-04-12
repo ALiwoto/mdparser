@@ -46,162 +46,94 @@ func (m *wotoMarkDown) AppendThis(v WMarkDown) WMarkDown {
 	return m.appendRawThis(v.ToString())
 }
 
+func (m *wotoMarkDown) Clone() WMarkDown {
+	return &wotoMarkDown{_value: m._value}
+}
+
 func (m *wotoMarkDown) ToString() string {
 	return m._value
 }
 
-func (m *wotoMarkDown) AppendNormal(text string) WMarkDown {
-	return m.appendText(text, toNormal)
-}
-
-func (m *wotoMarkDown) AppendNormalThis(text string) WMarkDown {
+func (m *wotoMarkDown) Normal(text string) WMarkDown {
 	return m.appendTextThis(text, toNormal)
 }
 
-func (m *wotoMarkDown) AppendBold(text string) WMarkDown {
-	return m.appendText(text, toBold)
-}
-
-func (m *wotoMarkDown) AppendBoldThis(text string) WMarkDown {
+func (m *wotoMarkDown) Bold(text string) WMarkDown {
 	return m.appendTextThis(text, toBold)
 }
 
-func (m *wotoMarkDown) AppendItalic(text string) WMarkDown {
-	return m.appendText(text, toItalic)
-}
-
-func (m *wotoMarkDown) AppendItalicThis(text string) WMarkDown {
+func (m *wotoMarkDown) Italic(text string) WMarkDown {
 	return m.appendTextThis(text, toItalic)
 }
 
-func (m *wotoMarkDown) AppendMono(text string) WMarkDown {
-	return m.appendText(text, toMono)
-}
-
-func (m *wotoMarkDown) AppendMonoThis(text string) WMarkDown {
+func (m *wotoMarkDown) Mono(text string) WMarkDown {
 	return m.appendTextThis(text, toMono)
 }
 
-func (m *wotoMarkDown) AppendUnderline(text string) WMarkDown {
-	return m.appendText(text, toUnderline)
-}
-
-func (m *wotoMarkDown) AppendUnderlineThis(text string) WMarkDown {
-	return m.appendTextThis(text, toUnderline)
-}
-
-func (m *wotoMarkDown) AppendStrike(text string) WMarkDown {
-	return m.appendText(text, toStrike)
-}
-
-func (m *wotoMarkDown) AppendStrikeThis(text string) WMarkDown {
+func (m *wotoMarkDown) Strike(text string) WMarkDown {
 	return m.appendTextThis(text, toStrike)
 }
 
-func (m *wotoMarkDown) AppendHyperLink(text, url string) WMarkDown {
-	return m.appendPair(text, url, toHyperLink)
-}
-
-func (m *wotoMarkDown) AppendHyperLinkThis(text, url string) WMarkDown {
-	return m.appendPairThis(text, url, toHyperLink)
-}
-
-func (m *wotoMarkDown) AppendMention(text string, id int64) WMarkDown {
-	return m.appendMention(text, id)
-}
-
-func (m *wotoMarkDown) AppendMentionThis(text string, id int64) WMarkDown {
-	return m.appendMentionThis(text, id)
-}
-
-func (m *wotoMarkDown) AppendSpoiler(text string) WMarkDown {
-	return m.appendText(text, toSpoiler)
-}
-
-func (m *wotoMarkDown) AppendSpoilerThis(text string) WMarkDown {
-	return m.appendTextThis(text, toSpoiler)
-}
-
-func (m *wotoMarkDown) Normal(text string) WMarkDown {
-	return m.AppendNormalThis(text)
-}
-
-func (m *wotoMarkDown) Bold(text string) WMarkDown {
-	return m.AppendBoldThis(text)
-}
-
-func (m *wotoMarkDown) Italic(text string) WMarkDown {
-	return m.AppendItalicThis(text)
-}
-
-func (m *wotoMarkDown) Mono(text string) WMarkDown {
-	return m.AppendMonoThis(text)
-}
-
-func (m *wotoMarkDown) Strike(text string) WMarkDown {
-	return m.AppendStrikeThis(text)
-}
-
 func (m *wotoMarkDown) Underline(text string) WMarkDown {
-	return m.AppendUnderlineThis(text)
+	return m.appendTextThis(text, toUnderline)
 }
 
 func (m *wotoMarkDown) HyperLink(text, url string) WMarkDown {
-	return m.AppendHyperLinkThis(text, url)
+	return m.appendPairThis(text, url, toHyperLink)
 }
 
 func (m *wotoMarkDown) Link(text, url string) WMarkDown {
-	return m.AppendHyperLinkThis(text, url)
+	return m.appendPairThis(text, url, toHyperLink)
 }
 
 // Mention, mentions a user.
 func (m *wotoMarkDown) Mention(text string, id int64) WMarkDown {
-	return m.AppendMentionThis(text, id)
+	return m.appendMentionThis(text, id)
 }
 
 // UserMention, mentions a user.
 func (m *wotoMarkDown) UserMention(text string, id int64) WMarkDown {
-	return m.AppendMentionThis(text, id)
+	return m.appendMentionThis(text, id)
 }
 
 func (m *wotoMarkDown) Spoiler(text string) WMarkDown {
-	return m.AppendSpoilerThis(text)
+	return m.appendTextThis(text, toSpoiler)
 }
 
-// El method appends a new line (Endline) to the markdown value and returns
+// El method appends a new line (End-line) to the markdown value and returns
 // a new instance of WMarkDown.
 func (m *wotoMarkDown) El() WMarkDown {
-	return m.AppendNormal("\n")
+	return m.Clone().Normal("\n")
 }
 
-// ElThis method appends a new line (Endline) to the current markdown value and
+// ElThis method appends a new line (End-line) to the current markdown value and
 // returns the current instance of WMarkDown.
 func (m *wotoMarkDown) ElThis() WMarkDown {
-	return m.AppendNormalThis("\n")
+	return m.Normal("\n")
 }
 
 // Space method appends a space to the markdown value and returns
 // a new instance of WMarkDown.
 func (m *wotoMarkDown) Space() WMarkDown {
-	return m.AppendNormal(" ")
+	return m.Clone().Normal(" ")
 }
 
 // SpaceThis method appends a new line to the current markdown value and
 // returns the current instance of WMarkDown.
 func (m *wotoMarkDown) SpaceThis() WMarkDown {
-	return m.AppendNormalThis(" ")
+	return m.Normal(" ")
 }
 
 // Tab method appends a tab ("\t") to the markdown value and returns
 // a new instance of WMarkDown.
 func (m *wotoMarkDown) Tab() WMarkDown {
-	return m.AppendNormal("\t")
+	return m.Clone().Normal("\t")
 }
 
 // TabThis method appends a tab ("\t") to the current markdown value and
 // returns the current instance of WMarkDown.
 func (m *wotoMarkDown) TabThis() WMarkDown {
-	return m.AppendNormalThis("\t")
+	return m.Normal("\t")
 }
 
 func (m *wotoMarkDown) Replace(text1, text2 string) WMarkDown {
@@ -221,14 +153,6 @@ func (m *wotoMarkDown) appendRawThis(value string) WMarkDown {
 	return m
 }
 
-func (m *wotoMarkDown) appendText(text string, formatter func(string) string) WMarkDown {
-	if text == "" {
-		return m
-	}
-
-	return m.appendRaw(formatter(text))
-}
-
 func (m *wotoMarkDown) appendTextThis(text string, formatter func(string) string) WMarkDown {
 	if text == "" {
 		return m
@@ -237,28 +161,12 @@ func (m *wotoMarkDown) appendTextThis(text string, formatter func(string) string
 	return m.appendRawThis(formatter(text))
 }
 
-func (m *wotoMarkDown) appendPair(text, extra string, formatter func(string, string) string) WMarkDown {
-	if text == "" || extra == "" {
-		return m
-	}
-
-	return m.appendRaw(formatter(text, extra))
-}
-
 func (m *wotoMarkDown) appendPairThis(text, extra string, formatter func(string, string) string) WMarkDown {
 	if text == "" || extra == "" {
 		return m
 	}
 
 	return m.appendRawThis(formatter(text, extra))
-}
-
-func (m *wotoMarkDown) appendMention(text string, id int64) WMarkDown {
-	if text == "" || id == baseIndex {
-		return m
-	}
-
-	return m.appendRaw(toUserMention(text, id))
 }
 
 func (m *wotoMarkDown) appendMentionThis(text string, id int64) WMarkDown {

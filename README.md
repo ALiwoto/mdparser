@@ -22,13 +22,21 @@ import "github.com/ALiwoto/mdparser"
 
 
 func sendMessage(msg Message) {
-	md := mdparser.GetBold("This is a message").AppendNormal(":\n")
-	md = md.AppendItalic("Italic\n")
-	md = md.AppendMono("Mono space\n")
-	md = md.AppendHyperLink("text", "https://google.com")
+	md := mdparser.GetBold("This is a message")
+	md.Normal(":\n")
+	md.Italic("Italic\n")
+	md.Mono("Mono space\n")
+	md.HyperLink("text", "https://google.com")
 
 	msg.Reply(md.ToString(), options{version: "MarkdownV2"})
 }
 
 
+```
+
+If you need the old copy-style behavior, clone first:
+
+```go
+base := mdparser.GetNormal("hello")
+copy := base.Clone().Bold(" world")
 ```

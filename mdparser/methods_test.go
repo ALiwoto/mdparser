@@ -45,21 +45,48 @@ func TestAppendThisMutatesReceiver(t *testing.T) {
 	}
 }
 
-func TestAppendCopyMethods(t *testing.T) {
+func TestCloneReturnsIndependentCopy(t *testing.T) {
+	base := GetNormal("base").(*wotoMarkDown)
+	clone := base.Clone()
+
+	if clone == nil {
+		t.Fatal("Clone returned nil")
+	}
+
+	if clone == base {
+		t.Fatal("Clone returned the original receiver")
+	}
+
+	if clone.ToString() != "base" {
+		t.Fatalf("Clone() = %q, want %q", clone.ToString(), "base")
+	}
+
+	clone.Bold("!")
+
+	if clone.ToString() != "base*\\!*" {
+		t.Fatalf("mutated clone = %q, want %q", clone.ToString(), "base*\\!*")
+	}
+
+	if base.ToString() != "base" {
+		t.Fatalf("base changed to %q, want %q", base.ToString(), "base")
+	}
+}
+
+func TestCloneProvidesLegacyCopyStyleMigrationPath(t *testing.T) {
 	cases := []struct {
 		name string
-		call func(*wotoMarkDown) WMarkDown
+		call func(WMarkDown) WMarkDown
 		want string
 	}{
-		{name: "normal", call: func(m *wotoMarkDown) WMarkDown { return m.AppendNormal("text") }, want: "basetext"},
-		{name: "bold", call: func(m *wotoMarkDown) WMarkDown { return m.AppendBold("text") }, want: "base*text*"},
-		{name: "italic", call: func(m *wotoMarkDown) WMarkDown { return m.AppendItalic("text") }, want: "base_text_"},
-		{name: "mono", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMono("text") }, want: "base`text`"},
-		{name: "underline", call: func(m *wotoMarkDown) WMarkDown { return m.AppendUnderline("text") }, want: "base__text__"},
-		{name: "strike", call: func(m *wotoMarkDown) WMarkDown { return m.AppendStrike("text") }, want: "base~text~"},
-		{name: "hyperlink", call: func(m *wotoMarkDown) WMarkDown { return m.AppendHyperLink("text", "https://example.com") }, want: "base[text](https://example\\.com)"},
-		{name: "mention", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMention("user", 42) }, want: "base[user](tg://user?id=42)"},
-		{name: "spoiler", call: func(m *wotoMarkDown) WMarkDown { return m.AppendSpoiler("text") }, want: "base||text||"},
+		{name: "normal", call: func(m WMarkDown) WMarkDown { return m.Clone().Normal("text") }, want: "basetext"},
+		{name: "bold", call: func(m WMarkDown) WMarkDown { return m.Clone().Bold("text") }, want: "base*text*"},
+		{name: "italic", call: func(m WMarkDown) WMarkDown { return m.Clone().Italic("text") }, want: "base_text_"},
+		{name: "mono", call: func(m WMarkDown) WMarkDown { return m.Clone().Mono("text") }, want: "base`text`"},
+		{name: "underline", call: func(m WMarkDown) WMarkDown { return m.Clone().Underline("text") }, want: "base__text__"},
+		{name: "strike", call: func(m WMarkDown) WMarkDown { return m.Clone().Strike("text") }, want: "base~text~"},
+		{name: "hyperlink", call: func(m WMarkDown) WMarkDown { return m.Clone().HyperLink("text", "https://example.com") }, want: "base[text](https://example\\.com)"},
+		{name: "mention", call: func(m WMarkDown) WMarkDown { return m.Clone().Mention("user", 42) }, want: "base[user](tg://user?id=42)"},
+		{name: "spoiler", call: func(m WMarkDown) WMarkDown { return m.Clone().Spoiler("text") }, want: "base||text||"},
 	}
 
 	for _, tc := range cases {
@@ -72,7 +99,7 @@ func TestAppendCopyMethods(t *testing.T) {
 			}
 
 			if got == base {
-				t.Fatal("copy-style append returned the receiver")
+				t.Fatal("clone-based call returned the receiver")
 			}
 
 			if got.ToString() != tc.want {
@@ -86,108 +113,7 @@ func TestAppendCopyMethods(t *testing.T) {
 	}
 }
 
-func TestAppendCopyMethodsKeepReceiverForEmptyOrInvalidInput(t *testing.T) {
-	cases := []struct {
-		name string
-		call func(*wotoMarkDown) WMarkDown
-	}{
-		{name: "normal-empty", call: func(m *wotoMarkDown) WMarkDown { return m.AppendNormal("") }},
-		{name: "bold-empty", call: func(m *wotoMarkDown) WMarkDown { return m.AppendBold("") }},
-		{name: "italic-empty", call: func(m *wotoMarkDown) WMarkDown { return m.AppendItalic("") }},
-		{name: "mono-empty", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMono("") }},
-		{name: "underline-empty", call: func(m *wotoMarkDown) WMarkDown { return m.AppendUnderline("") }},
-		{name: "strike-empty", call: func(m *wotoMarkDown) WMarkDown { return m.AppendStrike("") }},
-		{name: "spoiler-empty", call: func(m *wotoMarkDown) WMarkDown { return m.AppendSpoiler("") }},
-		{name: "hyperlink-empty-text", call: func(m *wotoMarkDown) WMarkDown { return m.AppendHyperLink("", "https://example.com") }},
-		{name: "hyperlink-empty-url", call: func(m *wotoMarkDown) WMarkDown { return m.AppendHyperLink("text", "") }},
-		{name: "mention-empty-text", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMention("", 42) }},
-		{name: "mention-base-index", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMention("user", baseIndex) }},
-	}
-
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			base := GetNormal("base").(*wotoMarkDown)
-			got := tc.call(base)
-
-			if got != base {
-				t.Fatal("expected the original receiver to be returned")
-			}
-
-			if base.ToString() != "base" {
-				t.Fatalf("base changed to %q, want %q", base.ToString(), "base")
-			}
-		})
-	}
-}
-
-func TestAppendThisMethods(t *testing.T) {
-	cases := []struct {
-		name string
-		call func(*wotoMarkDown) WMarkDown
-		want string
-	}{
-		{name: "normal", call: func(m *wotoMarkDown) WMarkDown { return m.AppendNormalThis("text") }, want: "basetext"},
-		{name: "bold", call: func(m *wotoMarkDown) WMarkDown { return m.AppendBoldThis("text") }, want: "base*text*"},
-		{name: "italic", call: func(m *wotoMarkDown) WMarkDown { return m.AppendItalicThis("text") }, want: "base_text_"},
-		{name: "mono", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMonoThis("text") }, want: "base`text`"},
-		{name: "underline", call: func(m *wotoMarkDown) WMarkDown { return m.AppendUnderlineThis("text") }, want: "base__text__"},
-		{name: "strike", call: func(m *wotoMarkDown) WMarkDown { return m.AppendStrikeThis("text") }, want: "base~text~"},
-		{name: "hyperlink", call: func(m *wotoMarkDown) WMarkDown { return m.AppendHyperLinkThis("text", "https://example.com") }, want: "base[text](https://example\\.com)"},
-		{name: "mention", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMentionThis("user", 42) }, want: "base[user](tg://user?id=42)"},
-		{name: "spoiler", call: func(m *wotoMarkDown) WMarkDown { return m.AppendSpoilerThis("text") }, want: "base||text||"},
-	}
-
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			base := GetNormal("base").(*wotoMarkDown)
-			got := tc.call(base)
-
-			if got != base {
-				t.Fatal("expected the receiver to be returned")
-			}
-
-			if base.ToString() != tc.want {
-				t.Fatalf("%s = %q, want %q", tc.name, base.ToString(), tc.want)
-			}
-		})
-	}
-}
-
-func TestAppendThisMethodsKeepReceiverForEmptyOrInvalidInput(t *testing.T) {
-	cases := []struct {
-		name string
-		call func(*wotoMarkDown) WMarkDown
-	}{
-		{name: "normal-empty", call: func(m *wotoMarkDown) WMarkDown { return m.AppendNormalThis("") }},
-		{name: "bold-empty", call: func(m *wotoMarkDown) WMarkDown { return m.AppendBoldThis("") }},
-		{name: "italic-empty", call: func(m *wotoMarkDown) WMarkDown { return m.AppendItalicThis("") }},
-		{name: "mono-empty", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMonoThis("") }},
-		{name: "underline-empty", call: func(m *wotoMarkDown) WMarkDown { return m.AppendUnderlineThis("") }},
-		{name: "strike-empty", call: func(m *wotoMarkDown) WMarkDown { return m.AppendStrikeThis("") }},
-		{name: "spoiler-empty", call: func(m *wotoMarkDown) WMarkDown { return m.AppendSpoilerThis("") }},
-		{name: "hyperlink-empty-text", call: func(m *wotoMarkDown) WMarkDown { return m.AppendHyperLinkThis("", "https://example.com") }},
-		{name: "hyperlink-empty-url", call: func(m *wotoMarkDown) WMarkDown { return m.AppendHyperLinkThis("text", "") }},
-		{name: "mention-empty-text", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMentionThis("", 42) }},
-		{name: "mention-base-index", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMentionThis("user", baseIndex) }},
-	}
-
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			base := GetNormal("base").(*wotoMarkDown)
-			got := tc.call(base)
-
-			if got != base {
-				t.Fatal("expected the original receiver to be returned")
-			}
-
-			if base.ToString() != "base" {
-				t.Fatalf("base changed to %q, want %q", base.ToString(), "base")
-			}
-		})
-	}
-}
-
-func TestAliasMethodsMutateReceiver(t *testing.T) {
+func TestFormattingMethodsMutateReceiver(t *testing.T) {
 	cases := []struct {
 		name string
 		call func(*wotoMarkDown) WMarkDown
@@ -212,11 +138,45 @@ func TestAliasMethodsMutateReceiver(t *testing.T) {
 			got := tc.call(base)
 
 			if got != base {
-				t.Fatal("expected alias method to return the receiver")
+				t.Fatal("expected formatting method to return the receiver")
 			}
 
 			if base.ToString() != tc.want {
 				t.Fatalf("%s = %q, want %q", tc.name, base.ToString(), tc.want)
+			}
+		})
+	}
+}
+
+func TestFormattingMethodsKeepReceiverForEmptyOrInvalidInput(t *testing.T) {
+	cases := []struct {
+		name string
+		call func(*wotoMarkDown) WMarkDown
+	}{
+		{name: "normal-empty", call: func(m *wotoMarkDown) WMarkDown { return m.Normal("") }},
+		{name: "bold-empty", call: func(m *wotoMarkDown) WMarkDown { return m.Bold("") }},
+		{name: "italic-empty", call: func(m *wotoMarkDown) WMarkDown { return m.Italic("") }},
+		{name: "mono-empty", call: func(m *wotoMarkDown) WMarkDown { return m.Mono("") }},
+		{name: "underline-empty", call: func(m *wotoMarkDown) WMarkDown { return m.Underline("") }},
+		{name: "strike-empty", call: func(m *wotoMarkDown) WMarkDown { return m.Strike("") }},
+		{name: "spoiler-empty", call: func(m *wotoMarkDown) WMarkDown { return m.Spoiler("") }},
+		{name: "hyperlink-empty-text", call: func(m *wotoMarkDown) WMarkDown { return m.HyperLink("", "https://example.com") }},
+		{name: "hyperlink-empty-url", call: func(m *wotoMarkDown) WMarkDown { return m.HyperLink("text", "") }},
+		{name: "mention-empty-text", call: func(m *wotoMarkDown) WMarkDown { return m.Mention("", 42) }},
+		{name: "mention-base-index", call: func(m *wotoMarkDown) WMarkDown { return m.Mention("user", baseIndex) }},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			base := GetNormal("base").(*wotoMarkDown)
+			got := tc.call(base)
+
+			if got != base {
+				t.Fatal("expected the original receiver to be returned")
+			}
+
+			if base.ToString() != "base" {
+				t.Fatalf("base changed to %q, want %q", base.ToString(), "base")
 			}
 		})
 	}
