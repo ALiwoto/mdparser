@@ -1,10 +1,6 @@
 package mdparser
 
-import (
-	"testing"
-
-	ws "github.com/ALiwoto/ssg/ssg"
-)
+import "testing"
 
 func resetSecrets(t *testing.T) {
 	t.Helper()
@@ -100,7 +96,7 @@ func TestFormattingConstructors(t *testing.T) {
 		{name: "strike", got: GetStrike(input).ToString(), want: "~" + repaired + "~"},
 		{name: "hyperlink", got: GetHyperLink("a*b", "https://example.com/x_y").ToString(), want: "[a\\*b](https://example\\.com/x\\_y)"},
 		{name: "mention", got: GetUserMention("a*b", 42).ToString(), want: "[a\\*b](tg://user?id=42)"},
-		{name: "mention-base-index", got: GetUserMention("a*b", ws.BaseIndex).ToString(), want: "`a\\*b`"},
+		{name: "mention-base-index", got: GetUserMention("a*b", baseIndex).ToString(), want: "`a\\*b`"},
 		{name: "empty-normal", got: GetNormal("").ToString(), want: ""},
 		{name: "empty-bold", got: GetBold("").ToString(), want: ""},
 		{name: "empty-italic", got: GetItalic("").ToString(), want: ""},

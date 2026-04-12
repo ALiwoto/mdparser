@@ -6,9 +6,8 @@
 package mdparser
 
 import (
+	"strconv"
 	"strings"
-
-	ws "github.com/ALiwoto/ssg/ssg"
 )
 
 // AddSecret adds a new secret variable to the mdparser *globally*.
@@ -17,7 +16,10 @@ import (
 // an example of usage would be:
 //  mdparser.AddSecret(bot.Token, "$TOKEN")
 func AddSecret(value, name string) {
-	index := GetSecretIndexByValue(value)
+	secretMu.Lock()
+	defer secretMu.Unlock()
+
+	index := getSecretIndexByValue(value)
 	if index != -1 {
 		secrets[index].name = name
 		return
@@ -30,13 +32,19 @@ func AddSecret(value, name string) {
 }
 
 func RemoveSecretByValue(value string) {
-	index := GetSecretIndexByValue(value)
+	secretMu.Lock()
+	defer secretMu.Unlock()
+
+	index := getSecretIndexByValue(value)
 	if index != -1 {
 		secrets = append(secrets[:index], secrets[index+1:]...)
 	}
 }
 
 func RemoveSecretByName(name string) {
+	secretMu.Lock()
+	defer secretMu.Unlock()
+
 	var newSecrets []secretContainer
 	for _, current := range secrets {
 		if current.name != name {
@@ -48,6 +56,13 @@ func RemoveSecretByName(name string) {
 }
 
 func GetSecretIndexByValue(value string) int {
+	secretMu.RLock()
+	defer secretMu.RUnlock()
+
+	return getSecretIndexByValue(value)
+}
+
+func getSecretIndexByValue(value string) int {
 	for index, current := range secrets {
 		if current.value == value {
 			return index
@@ -58,19 +73,14 @@ func GetSecretIndexByValue(value string) int {
 }
 
 func SecretValueExists(value string) bool {
-	for _, current := range secrets {
-		if current.value == value {
-			return true
-		}
-	}
+	secretMu.RLock()
+	defer secretMu.RUnlock()
 
-	return false
+	return getSecretIndexByValue(value) != -1
 }
 
 func GetEmpty() WMarkDown {
-	return &wotoMarkDown{
-		_value: ws.EMPTY,
-	}
+	return &wotoMarkDown{}
 }
 
 func GetNormal(text string) WMarkDown {
@@ -204,7 +214,7 @@ func GetUserMention(text string, userID int64) WMarkDown {
 		return GetEmpty()
 	}
 
-	if userID == ws.BaseIndex {
+	if userID == baseIndex {
 		return GetMono(text)
 	}
 
@@ -212,11 +222,11 @@ func GetUserMention(text string, userID int64) WMarkDown {
 }
 
 func toUserMention(text string, id int64) string {
-	return "[" + repairValue(text) + "]" + "(" + _TG_USER_ID + ws.ToBase10(id) + ")"
+	return "[" + repairValue(text) + "]" + "(" + telegramUserIDPrefix + strconv.FormatInt(id, 10) + ")"
 }
 
 func IsSpecial(r rune) bool {
-	return _sChars[r]
+	return strings.ContainsRune(specialChars, r)
 }
 
 func toWotoMD(text string) WMarkDown {
@@ -230,22 +240,29 @@ func toWotoMD(text string) WMarkDown {
 }
 
 func repairValue(value string) string {
-	if len(secrets) != 0 {
-		value = checkSecrets(value)
+	if value == "" {
+		return ""
 	}
 
-	finally := ws.EMPTY
+	value = checkSecrets(value)
+
+	var builder strings.Builder
+	builder.Grow(len(value) * 2)
+
 	for _, current := range value {
 		if IsSpecial(current) {
-			finally += string(_CHAR_S1)
+			builder.WriteRune(markdownEscapeChar)
 		}
-		finally += string(current)
+		builder.WriteRune(current)
 	}
 
-	return finally
+	return builder.String()
 }
 
 func checkSecrets(value string) string {
+	secretMu.RLock()
+	defer secretMu.RUnlock()
+
 	for _, current := range secrets {
 		value = strings.ReplaceAll(value, current.value, current.name)
 	}

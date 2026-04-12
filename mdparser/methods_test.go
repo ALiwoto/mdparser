@@ -1,10 +1,6 @@
 package mdparser
 
-import (
-	"testing"
-
-	ws "github.com/ALiwoto/ssg/ssg"
-)
+import "testing"
 
 func TestAppendCombinesMarkdownValues(t *testing.T) {
 	base := GetNormal("hello ").(*wotoMarkDown)
@@ -105,7 +101,7 @@ func TestAppendCopyMethodsKeepReceiverForEmptyOrInvalidInput(t *testing.T) {
 		{name: "hyperlink-empty-text", call: func(m *wotoMarkDown) WMarkDown { return m.AppendHyperLink("", "https://example.com") }},
 		{name: "hyperlink-empty-url", call: func(m *wotoMarkDown) WMarkDown { return m.AppendHyperLink("text", "") }},
 		{name: "mention-empty-text", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMention("", 42) }},
-		{name: "mention-base-index", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMention("user", ws.BaseIndex) }},
+		{name: "mention-base-index", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMention("user", baseIndex) }},
 	}
 
 	for _, tc := range cases {
@@ -172,7 +168,7 @@ func TestAppendThisMethodsKeepReceiverForEmptyOrInvalidInput(t *testing.T) {
 		{name: "hyperlink-empty-text", call: func(m *wotoMarkDown) WMarkDown { return m.AppendHyperLinkThis("", "https://example.com") }},
 		{name: "hyperlink-empty-url", call: func(m *wotoMarkDown) WMarkDown { return m.AppendHyperLinkThis("text", "") }},
 		{name: "mention-empty-text", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMentionThis("", 42) }},
-		{name: "mention-base-index", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMentionThis("user", ws.BaseIndex) }},
+		{name: "mention-base-index", call: func(m *wotoMarkDown) WMarkDown { return m.AppendMentionThis("user", baseIndex) }},
 	}
 
 	for _, tc := range cases {

@@ -8,8 +8,6 @@ package mdparser
 import (
 	"reflect"
 	"strings"
-
-	"github.com/ALiwoto/ssg/ssg"
 )
 
 func (m *wotoMarkDown) setValue(text string) {
@@ -183,7 +181,7 @@ func (m *wotoMarkDown) AppendStrikeThis(text string) WMarkDown {
 }
 
 func (m *wotoMarkDown) AppendHyperLink(text, url string) WMarkDown {
-	if text == "" || ssg.IsEmpty(&url) {
+	if text == "" || url == "" {
 		return m
 	}
 
@@ -191,7 +189,7 @@ func (m *wotoMarkDown) AppendHyperLink(text, url string) WMarkDown {
 }
 
 func (m *wotoMarkDown) AppendHyperLinkThis(text, url string) WMarkDown {
-	if text == "" || ssg.IsEmpty(&url) {
+	if text == "" || url == "" {
 		return m
 	}
 
@@ -201,7 +199,7 @@ func (m *wotoMarkDown) AppendHyperLinkThis(text, url string) WMarkDown {
 }
 
 func (m *wotoMarkDown) AppendMention(text string, id int64) WMarkDown {
-	if text == "" || id == ssg.BaseIndex {
+	if text == "" || id == baseIndex {
 		return m
 	}
 
@@ -209,7 +207,7 @@ func (m *wotoMarkDown) AppendMention(text string, id int64) WMarkDown {
 }
 
 func (m *wotoMarkDown) AppendMentionThis(text string, id int64) WMarkDown {
-	if text == "" || id == ssg.BaseIndex {
+	if text == "" || id == baseIndex {
 		return m
 	}
 
