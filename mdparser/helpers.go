@@ -89,7 +89,7 @@ func GetNormal(text string) WMarkDown {
 		return GetEmpty()
 	}
 
-	return toWotoMD(toNormal(text))
+	return newWotoMD(newTextSegment(segmentNormal, text))
 }
 
 func toNormal(value string) string {
@@ -105,7 +105,7 @@ func GetBold(text string) WMarkDown {
 		return GetEmpty()
 	}
 
-	return toWotoMD(toBold(text))
+	return newWotoMD(newTextSegment(segmentBold, text))
 }
 
 func toBold(value string) string {
@@ -121,7 +121,7 @@ func GetItalic(text string) WMarkDown {
 		return GetEmpty()
 	}
 
-	return toWotoMD(toItalic(text))
+	return newWotoMD(newTextSegment(segmentItalic, text))
 }
 
 func toItalic(value string) string {
@@ -133,7 +133,7 @@ func GetMono(text string) WMarkDown {
 		return GetEmpty()
 	}
 
-	return toWotoMD(toMono(text))
+	return newWotoMD(newTextSegment(segmentMono, text))
 }
 
 func toMono(value string) string {
@@ -149,7 +149,7 @@ func GetCodeBlock(text string) WMarkDown {
 		return GetEmpty()
 	}
 
-	return toWotoMD(toCodeBlock(text))
+	return newWotoMD(newTextSegment(segmentCodeBlock, text))
 }
 
 func toCodeBlock(value string) string {
@@ -165,7 +165,7 @@ func GetCodeBlockLang(lang, text string) WMarkDown {
 		return GetEmpty()
 	}
 
-	return toWotoMD(toCodeBlockLang(lang, text))
+	return newWotoMD(newCodeBlockLangSegment(lang, text))
 }
 
 func toCodeBlockLang(lang, value string) string {
@@ -186,7 +186,7 @@ func GetSpoiler(text string) WMarkDown {
 		return GetEmpty()
 	}
 
-	return toWotoMD(toSpoiler(text))
+	return newWotoMD(newTextSegment(segmentSpoiler, text))
 }
 
 func toSpoiler(value string) string {
@@ -202,7 +202,7 @@ func GetUnderline(text string) WMarkDown {
 		return GetEmpty()
 	}
 
-	return toWotoMD(toUnderline(text))
+	return newWotoMD(newTextSegment(segmentUnderline, text))
 }
 
 func toUnderline(value string) string {
@@ -218,7 +218,7 @@ func GetStrike(text string) WMarkDown {
 		return GetEmpty()
 	}
 
-	return toWotoMD(toStrike(text))
+	return newWotoMD(newTextSegment(segmentStrike, text))
 }
 
 func toStrike(value string) string {
@@ -234,7 +234,7 @@ func GetHyperLink(text string, url string) WMarkDown {
 		return GetEmpty()
 	}
 
-	return toWotoMD(toHyperLink(text, url))
+	return newWotoMD(newHyperLinkSegment(text, url))
 }
 
 func toHyperLink(text, url string) string {
@@ -256,7 +256,7 @@ func GetUserMention(text string, userID int64) WMarkDown {
 		return GetMono(text)
 	}
 
-	return toWotoMD(toUserMention(text, userID))
+	return newWotoMD(newMentionSegment(text, userID))
 }
 
 func toUserMention(text string, id int64) string {
@@ -272,9 +272,7 @@ func toWotoMD(text string) WMarkDown {
 		return nil
 	}
 
-	return &wotoMarkDown{
-		_value: text,
-	}
+	return newWotoMD(newRawSegment(text))
 }
 
 func repairValue(value string) string {
@@ -282,19 +280,7 @@ func repairValue(value string) string {
 		return ""
 	}
 
-	value = checkSecrets(value)
-
-	var builder strings.Builder
-	builder.Grow(len(value) * 2)
-
-	for _, current := range value {
-		if IsSpecial(current) {
-			builder.WriteRune(markdownEscapeChar)
-		}
-		builder.WriteRune(current)
-	}
-
-	return builder.String()
+	return escapeValue(checkSecrets(value))
 }
 
 func repairCodeValue(value string) string {
@@ -302,19 +288,7 @@ func repairCodeValue(value string) string {
 		return ""
 	}
 
-	value = checkSecrets(value)
-
-	var builder strings.Builder
-	builder.Grow(len(value) * 2)
-
-	for _, current := range value {
-		if current == markdownEscapeChar || current == '`' {
-			builder.WriteRune(markdownEscapeChar)
-		}
-		builder.WriteRune(current)
-	}
-
-	return builder.String()
+	return escapeCodeValue(checkSecrets(value))
 }
 
 func normalizeCodeLanguage(lang string) string {
@@ -336,6 +310,173 @@ func normalizeCodeLanguage(lang string) string {
 	}
 
 	return builder.String()
+}
+
+func escapeValue(value string) string {
+	var builder strings.Builder
+	builder.Grow(len(value) * 2)
+
+	for _, current := range value {
+		if IsSpecial(current) {
+			builder.WriteRune(markdownEscapeChar)
+		}
+		builder.WriteRune(current)
+	}
+
+	return builder.String()
+}
+
+func escapeCodeValue(value string) string {
+	var builder strings.Builder
+	builder.Grow(len(value) * 2)
+
+	for _, current := range value {
+		if current == markdownEscapeChar || current == '`' {
+			builder.WriteRune(markdownEscapeChar)
+		}
+		builder.WriteRune(current)
+	}
+
+	return builder.String()
+}
+
+func newWotoMD(segments ...markdownSegment) WMarkDown {
+	return &wotoMarkDown{
+		_segments: cloneSegments(segments),
+	}
+}
+
+func cloneSegments(segments []markdownSegment) []markdownSegment {
+	if len(segments) == 0 {
+		return nil
+	}
+
+	cloned := make([]markdownSegment, len(segments))
+	copy(cloned, segments)
+	return cloned
+}
+
+func newRawSegment(value string) markdownSegment {
+	return markdownSegment{
+		kind: segmentRaw,
+		text: value,
+	}
+}
+
+func newTextSegment(kind markdownSegmentKind, text string) markdownSegment {
+	return markdownSegment{
+		kind: kind,
+		text: sanitizeValue(text),
+	}
+}
+
+func newCodeBlockLangSegment(lang, text string) markdownSegment {
+	normalized := normalizeCodeLanguage(lang)
+	if normalized == "" {
+		return newTextSegment(segmentCodeBlock, text)
+	}
+
+	return markdownSegment{
+		kind: segmentCodeBlockLang,
+		text: sanitizeValue(text),
+		meta: normalized,
+	}
+}
+
+func newHyperLinkSegment(text, url string) markdownSegment {
+	return markdownSegment{
+		kind: segmentHyperLink,
+		text: sanitizeValue(text),
+		meta: sanitizeValue(url),
+	}
+}
+
+func newMentionSegment(text string, id int64) markdownSegment {
+	return markdownSegment{
+		kind: segmentMention,
+		text: sanitizeValue(text),
+		meta: strconv.FormatInt(id, 10),
+	}
+}
+
+func sanitizeValue(value string) string {
+	if value == "" {
+		return ""
+	}
+
+	return checkSecrets(value)
+}
+
+func renderSegments(segments []markdownSegment) string {
+	if len(segments) == 0 {
+		return ""
+	}
+
+	var builder strings.Builder
+	for _, current := range segments {
+		appendRenderedSegment(&builder, current)
+	}
+
+	return builder.String()
+}
+
+func appendRenderedSegment(builder *strings.Builder, segment markdownSegment) {
+	switch segment.kind {
+	case segmentRaw:
+		builder.WriteString(segment.text)
+	case segmentNormal:
+		builder.WriteString(escapeValue(segment.text))
+	case segmentBold:
+		builder.WriteByte('*')
+		builder.WriteString(escapeValue(segment.text))
+		builder.WriteByte('*')
+	case segmentItalic:
+		builder.WriteByte('_')
+		builder.WriteString(escapeValue(segment.text))
+		builder.WriteByte('_')
+	case segmentMono:
+		builder.WriteByte('`')
+		builder.WriteString(escapeValue(segment.text))
+		builder.WriteByte('`')
+	case segmentCodeBlock:
+		builder.WriteString(markdownCodeFence)
+		builder.WriteByte('\n')
+		builder.WriteString(escapeCodeValue(segment.text))
+		builder.WriteByte('\n')
+		builder.WriteString(markdownCodeFence)
+	case segmentCodeBlockLang:
+		builder.WriteString(markdownCodeFence)
+		builder.WriteString(segment.meta)
+		builder.WriteByte('\n')
+		builder.WriteString(escapeCodeValue(segment.text))
+		builder.WriteByte('\n')
+		builder.WriteString(markdownCodeFence)
+	case segmentSpoiler:
+		builder.WriteString("||")
+		builder.WriteString(escapeValue(segment.text))
+		builder.WriteString("||")
+	case segmentUnderline:
+		builder.WriteString("__")
+		builder.WriteString(escapeValue(segment.text))
+		builder.WriteString("__")
+	case segmentStrike:
+		builder.WriteByte('~')
+		builder.WriteString(escapeValue(segment.text))
+		builder.WriteByte('~')
+	case segmentHyperLink:
+		builder.WriteByte('[')
+		builder.WriteString(escapeValue(segment.text))
+		builder.WriteString("](")
+		builder.WriteString(escapeValue(segment.meta))
+		builder.WriteByte(')')
+	case segmentMention:
+		builder.WriteByte('[')
+		builder.WriteString(escapeValue(segment.text))
+		builder.WriteString("](")
+		builder.WriteString(telegramUserIDPrefix)
+		builder.WriteString(segment.meta)
+		builder.WriteByte(')')
+	}
 }
 
 func checkSecrets(value string) string {

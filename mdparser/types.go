@@ -64,8 +64,16 @@ type WMarkDown interface {
 	ReplaceN(text1, text2 string, n int) WMarkDown
 }
 
+type markdownSegmentKind uint8
+
+type markdownSegment struct {
+	kind markdownSegmentKind
+	text string
+	meta string
+}
+
 type wotoMarkDown struct {
-	_value string
+	_segments []markdownSegment
 }
 
 // secretContainer contains information about a secret value which needs

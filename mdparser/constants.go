@@ -12,3 +12,18 @@ const (
 	telegramUserIDPrefix = "tg://user?id="
 	specialChars         = "\\'_*{}[]()#+-.!`=><~|"
 )
+
+const (
+	segmentRaw markdownSegmentKind = iota
+	segmentNormal
+	segmentBold
+	segmentItalic
+	segmentMono
+	segmentCodeBlock
+	segmentCodeBlockLang
+	segmentSpoiler
+	segmentUnderline
+	segmentStrike
+	segmentHyperLink
+	segmentMention
+)

@@ -112,6 +112,7 @@ func TestFormattingMethodsMutateReceiver(t *testing.T) {
 		{name: "mono", call: func(m *wotoMarkDown) WMarkDown { return m.Mono("text") }, want: "base`text`"},
 		{name: "code-block", call: func(m *wotoMarkDown) WMarkDown { return m.CodeBlock("fmt.Println(`x`)") }, want: "base```\nfmt.Println(\\`x\\`)\n```"},
 		{name: "code-block-lang", call: func(m *wotoMarkDown) WMarkDown { return m.CodeBlockLang("go", "fmt.Println(`x`)") }, want: "base```go\nfmt.Println(\\`x\\`)\n```"},
+		{name: "code-block-lang-empty-lang", call: func(m *wotoMarkDown) WMarkDown { return m.CodeBlockLang("", "fmt.Println(`x`)") }, want: "base```\nfmt.Println(\\`x\\`)\n```"},
 		{name: "strike", call: func(m *wotoMarkDown) WMarkDown { return m.Strike("text") }, want: "base~text~"},
 		{name: "underline", call: func(m *wotoMarkDown) WMarkDown { return m.Underline("text") }, want: "base__text__"},
 		{name: "hyperlink", call: func(m *wotoMarkDown) WMarkDown { return m.HyperLink("text", "https://example.com") }, want: "base[text](https://example\\.com)"},

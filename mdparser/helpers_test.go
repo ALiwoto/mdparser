@@ -89,6 +89,17 @@ func TestRepairCodeValueCensorsSecretsAndEscapesCodeFenceChars(t *testing.T) {
 	}
 }
 
+func TestSecretsAreAppliedWhenSegmentsAreCreated(t *testing.T) {
+	resetSecrets(t)
+
+	md := GetNormal("token-123")
+	AddSecret("token-123", "$TOKEN")
+
+	if got := md.ToString(); got != "token\\-123" {
+		t.Fatalf("ToString() after late AddSecret = %q, want %q", got, "token\\-123")
+	}
+}
+
 func TestNormalizeCodeLanguage(t *testing.T) {
 	got := normalizeCodeLanguage("  go\t\r\n")
 	want := "go"
