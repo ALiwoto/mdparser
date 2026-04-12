@@ -34,7 +34,7 @@ func sendMessage(msg Message) {
 
 ```
 
-If you need the old copy-style behavior, clone first:
+All instance methods mutate the current markdown. If you need a copy first, clone explicitly:
 
 ```go
 base := mdparser.GetNormal("hello")

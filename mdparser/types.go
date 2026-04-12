@@ -6,15 +6,11 @@
 package mdparser
 
 type WMarkDown interface {
-	// Append method appends the w-markdown value to a new copy of the current
-	// w-markdown and returns the copy.
+	// Append method appends the given markdown value to the current markdown.
 	Append(md WMarkDown) WMarkDown
-	AppendThis(md WMarkDown) WMarkDown
 	Clone() WMarkDown
 	ReplaceMd(md1, md2 WMarkDown) WMarkDown
 	ReplaceMdN(md1, md2 WMarkDown, n int) WMarkDown
-	ReplaceMdThis(md1, md2 WMarkDown) WMarkDown
-	ReplaceMdThisN(md1, md2 WMarkDown, n int) WMarkDown
 	ToString() string
 
 	ReplaceToNew(text1, text2 string) WMarkDown
@@ -33,12 +29,10 @@ type WMarkDown interface {
 	Underline(text string) WMarkDown
 
 	El() WMarkDown
-	ElThis() WMarkDown
 	Space() WMarkDown
-	SpaceThis() WMarkDown
 	Tab() WMarkDown
-	TabThis() WMarkDown
 	Replace(text1, text2 string) WMarkDown
+	ReplaceN(text1, text2 string, n int) WMarkDown
 }
 
 type wotoMarkDown struct {

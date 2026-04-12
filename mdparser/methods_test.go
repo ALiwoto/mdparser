@@ -11,37 +11,16 @@ func TestAppendCombinesMarkdownValues(t *testing.T) {
 		t.Fatal("Append returned nil")
 	}
 
-	if got == base {
-		t.Fatal("Append returned the original receiver")
+	if got != base {
+		t.Fatal("Append should return the receiver")
 	}
 
 	if got.ToString() != "hello *world*" {
 		t.Fatalf("Append() = %q, want %q", got.ToString(), "hello *world*")
 	}
 
-	if base.ToString() != "hello " {
-		t.Fatalf("base changed to %q, want %q", base.ToString(), "hello ")
-	}
-}
-
-func TestAppendRejectsNilMarkdown(t *testing.T) {
-	base := GetNormal("hello").(*wotoMarkDown)
-
-	if got := base.Append(nil); got != nil {
-		t.Fatalf("Append(nil) = %#v, want nil", got)
-	}
-}
-
-func TestAppendThisMutatesReceiver(t *testing.T) {
-	base := GetNormal("hello ").(*wotoMarkDown)
-	got := base.AppendThis(GetItalic("world"))
-
-	if got != base {
-		t.Fatal("AppendThis should return the receiver")
-	}
-
-	if base.ToString() != "hello _world_" {
-		t.Fatalf("AppendThis() = %q, want %q", base.ToString(), "hello _world_")
+	if base.ToString() != "hello *world*" {
+		t.Fatalf("base changed to %q, want %q", base.ToString(), "hello *world*")
 	}
 }
 
@@ -87,6 +66,12 @@ func TestCloneProvidesLegacyCopyStyleMigrationPath(t *testing.T) {
 		{name: "hyperlink", call: func(m WMarkDown) WMarkDown { return m.Clone().HyperLink("text", "https://example.com") }, want: "base[text](https://example\\.com)"},
 		{name: "mention", call: func(m WMarkDown) WMarkDown { return m.Clone().Mention("user", 42) }, want: "base[user](tg://user?id=42)"},
 		{name: "spoiler", call: func(m WMarkDown) WMarkDown { return m.Clone().Spoiler("text") }, want: "base||text||"},
+		{name: "append", call: func(m WMarkDown) WMarkDown { return m.Clone().Append(GetBold("text")) }, want: "base*text*"},
+		{name: "replace-md", call: func(m WMarkDown) WMarkDown { return m.Clone().ReplaceMd(GetNormal("base"), GetBold("next")) }, want: "*next*"},
+		{name: "replace-to-new", call: func(m WMarkDown) WMarkDown { return m.Clone().ReplaceToNew("base", "next") }, want: "next"},
+		{name: "space", call: func(m WMarkDown) WMarkDown { return m.Clone().Space() }, want: "base "},
+		{name: "tab", call: func(m WMarkDown) WMarkDown { return m.Clone().Tab() }, want: "base\t"},
+		{name: "el", call: func(m WMarkDown) WMarkDown { return m.Clone().El() }, want: "base\n"},
 	}
 
 	for _, tc := range cases {
@@ -182,35 +167,31 @@ func TestFormattingMethodsKeepReceiverForEmptyOrInvalidInput(t *testing.T) {
 	}
 }
 
+func TestAppendKeepsReceiverOnNilMarkdown(t *testing.T) {
+	base := GetNormal("hello").(*wotoMarkDown)
+
+	if got := base.Append(nil); got != nil {
+		t.Fatalf("Append(nil) = %#v, want nil", got)
+	}
+
+	if base.ToString() != "hello" {
+		t.Fatalf("base changed to %q, want %q", base.ToString(), "hello")
+	}
+}
+
 func TestWhitespaceHelpers(t *testing.T) {
 	base := GetNormal("base").(*wotoMarkDown)
 
-	if got := base.El(); got.ToString() != "base\n" || got == base {
-		t.Fatalf("El() = %q, want new markdown with newline", got.ToString())
+	if got := base.El(); got.ToString() != "base\n" || got != base {
+		t.Fatalf("El() receiver = %q, want %q", got.ToString(), "base\n")
 	}
 
-	if base.ToString() != "base" {
-		t.Fatalf("base changed after El to %q", base.ToString())
+	if got := base.Space(); got.ToString() != "base\n " || got != base {
+		t.Fatalf("Space() receiver = %q, want %q", got.ToString(), "base\n ")
 	}
 
-	if got := base.Space(); got.ToString() != "base " || got == base {
-		t.Fatalf("Space() = %q, want new markdown with space", got.ToString())
-	}
-
-	if got := base.Tab(); got.ToString() != "base\t" || got == base {
-		t.Fatalf("Tab() = %q, want new markdown with tab", got.ToString())
-	}
-
-	if got := base.ElThis(); got != base || base.ToString() != "base\n" {
-		t.Fatalf("ElThis() receiver = %q, want %q", base.ToString(), "base\n")
-	}
-
-	if got := base.SpaceThis(); got != base || base.ToString() != "base\n " {
-		t.Fatalf("SpaceThis() receiver = %q, want %q", base.ToString(), "base\n ")
-	}
-
-	if got := base.TabThis(); got != base || base.ToString() != "base\n \t" {
-		t.Fatalf("TabThis() receiver = %q, want %q", base.ToString(), "base\n \t")
+	if got := base.Tab(); got.ToString() != "base\n \t" || got != base {
+		t.Fatalf("Tab() receiver = %q, want %q", got.ToString(), "base\n \t")
 	}
 }
 
@@ -219,41 +200,26 @@ func TestReplaceMarkdownVariants(t *testing.T) {
 	md1 := GetNormal("alpha")
 	md2 := GetBold("omega")
 
-	if got := base.ReplaceMd(md1, md2); got.ToString() != "*omega* beta *omega*" || got == base {
-		t.Fatalf("ReplaceMd() = %q, want new markdown %q", got.ToString(), "*omega* beta *omega*")
-	}
-
-	if base.ToString() != "alpha beta alpha" {
-		t.Fatalf("base changed after ReplaceMd to %q", base.ToString())
-	}
-
-	if got := base.ReplaceMdN(md1, md2, 1); got.ToString() != "*omega* beta alpha" || got == base {
-		t.Fatalf("ReplaceMdN() = %q, want new markdown %q", got.ToString(), "*omega* beta alpha")
-	}
-
-	if got := base.ReplaceMdThis(md1, md2); got != base || base.ToString() != "*omega* beta *omega*" {
-		t.Fatalf("ReplaceMdThis() receiver = %q, want %q", base.ToString(), "*omega* beta *omega*")
+	if got := base.ReplaceMd(md1, md2); got.ToString() != "*omega* beta *omega*" || got != base {
+		t.Fatalf("ReplaceMd() receiver = %q, want %q", got.ToString(), "*omega* beta *omega*")
 	}
 
 	base = GetNormal("alpha beta alpha").(*wotoMarkDown)
-	if got := base.ReplaceMdThisN(md1, md2, 1); got != base || base.ToString() != "*omega* beta alpha" {
-		t.Fatalf("ReplaceMdThisN() receiver = %q, want %q", base.ToString(), "*omega* beta alpha")
+	if got := base.ReplaceMdN(md1, md2, 1); got.ToString() != "*omega* beta alpha" || got != base {
+		t.Fatalf("ReplaceMdN() receiver = %q, want %q", got.ToString(), "*omega* beta alpha")
 	}
 }
 
 func TestReplaceStringVariants(t *testing.T) {
 	base := GetNormal("a*b a*b").(*wotoMarkDown)
 
-	if got := base.ReplaceToNew("a*b", "x+y"); got.ToString() != "x\\+y x\\+y" || got == base {
-		t.Fatalf("ReplaceToNew() = %q, want new markdown %q", got.ToString(), "x\\+y x\\+y")
+	if got := base.ReplaceToNew("a*b", "x+y"); got.ToString() != "x\\+y x\\+y" || got != base {
+		t.Fatalf("ReplaceToNew() receiver = %q, want %q", got.ToString(), "x\\+y x\\+y")
 	}
 
-	if base.ToString() != "a\\*b a\\*b" {
-		t.Fatalf("base changed after ReplaceToNew to %q", base.ToString())
-	}
-
-	if got := base.ReplaceToNewN("a*b", "x+y", 1); got.ToString() != "x\\+y a\\*b" || got == base {
-		t.Fatalf("ReplaceToNewN() = %q, want new markdown %q", got.ToString(), "x\\+y a\\*b")
+	base = GetNormal("a*b a*b").(*wotoMarkDown)
+	if got := base.ReplaceToNewN("a*b", "x+y", 1); got.ToString() != "x\\+y a\\*b" || got != base {
+		t.Fatalf("ReplaceToNewN() receiver = %q, want %q", got.ToString(), "x\\+y a\\*b")
 	}
 
 	if got := base.Replace("a*b", "x+y"); got != base || base.ToString() != "x\\+y x\\+y" {
