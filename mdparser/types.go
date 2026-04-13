@@ -19,6 +19,8 @@ type WMarkDown interface {
 	ReplaceMdN(md1, md2 WMarkDown, n int) WMarkDown
 	// ToString returns the final markdown string.
 	ToString() string
+	// ToUnformattedString returns the stored content without markdown formatting or escaping.
+	ToUnformattedString() string
 
 	// ReplaceToNew replaces all matching plain-text fragments with escaped plain-text replacements.
 	ReplaceToNew(text1, text2 string) WMarkDown

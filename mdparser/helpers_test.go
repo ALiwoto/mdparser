@@ -230,6 +230,45 @@ func TestFormattingConstructorsKeepEmptyResultForEmptyOrInvalidInput(t *testing.
 	}
 }
 
+func TestToUnformattedString(t *testing.T) {
+	cases := []struct {
+		name string
+		md   WMarkDown
+		want string
+	}{
+		{name: "empty", md: GetEmpty(), want: ""},
+		{name: "normal", md: GetNormal("a*b"), want: "a*b"},
+		{name: "bold", md: GetBold("a*b"), want: "a*b"},
+		{name: "italic", md: GetItalic("a*b"), want: "a*b"},
+		{name: "mono", md: GetMono("a*b"), want: "a*b"},
+		{name: "styled", md: GetStyled("a*b", StyleBold, StyleItalic), want: "a*b"},
+		{name: "code-block", md: GetCodeBlock("fmt.Println(`x`)"), want: "fmt.Println(`x`)"},
+		{name: "code-block-lang", md: GetCodeBlockLang("go", "fmt.Println(`x`)"), want: "fmt.Println(`x`)"},
+		{name: "spoiler", md: GetSpoiler("a*b"), want: "a*b"},
+		{name: "underline", md: GetUnderline("a*b"), want: "a*b"},
+		{name: "strike", md: GetStrike("a*b"), want: "a*b"},
+		{name: "hyperlink", md: GetHyperLink("click", "https://example.com"), want: "click"},
+		{name: "mention", md: GetUserMention("user", 42), want: "user"},
+		{name: "mixed-builder", md: GetNormal("hello ").Append(GetBold("world")).Spoiler("!"), want: "hello world!"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := tc.md.ToUnformattedString(); got != tc.want {
+				t.Fatalf("%s = %q, want %q", tc.name, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestToUnformattedStringReturnsStoredRawSegmentsAsIs(t *testing.T) {
+	md := newWotoMD(newRawSegment("*raw*"))
+
+	if got := md.ToUnformattedString(); got != "*raw*" {
+		t.Fatalf("ToUnformattedString() = %q, want %q", got, "*raw*")
+	}
+}
+
 func TestIsSpecial(t *testing.T) {
 	if !IsSpecial('*') {
 		t.Fatal("expected '*' to be special")

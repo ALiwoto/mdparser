@@ -302,6 +302,19 @@ func renderSegments(segments []markdownSegment) string {
 	return builder.String()
 }
 
+func renderUnformattedSegments(segments []markdownSegment) string {
+	if len(segments) == 0 {
+		return ""
+	}
+
+	var builder strings.Builder
+	for _, current := range segments {
+		appendUnformattedSegment(&builder, current)
+	}
+
+	return builder.String()
+}
+
 func appendRenderedSegment(builder *strings.Builder, segment markdownSegment) {
 	switch segment.kind {
 	case segmentRaw:
@@ -360,5 +373,12 @@ func appendRenderedSegment(builder *strings.Builder, segment markdownSegment) {
 		builder.WriteString(telegramUserIDPrefix)
 		builder.WriteString(segment.meta)
 		builder.WriteByte(')')
+	}
+}
+
+func appendUnformattedSegment(builder *strings.Builder, segment markdownSegment) {
+	builder.WriteString(segment.text)
+	if segment.meta != "" {
+		builder.WriteString(" (" + segment.meta + ")")
 	}
 }

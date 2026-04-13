@@ -47,6 +47,10 @@ func (m *wotoMarkDown) ToString() string {
 	return renderSegments(m._segments)
 }
 
+func (m *wotoMarkDown) ToUnformattedString() string {
+	return renderUnformattedSegments(m._segments)
+}
+
 func (m *wotoMarkDown) Normal(values ...any) WMarkDown {
 	return m.appendFormattedText(segmentNormal, values...)
 }
