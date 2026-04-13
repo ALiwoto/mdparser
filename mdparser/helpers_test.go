@@ -243,12 +243,12 @@ func TestToUnformattedString(t *testing.T) {
 		{name: "mono", md: GetMono("a*b"), want: "a*b"},
 		{name: "styled", md: GetStyled("a*b", StyleBold, StyleItalic), want: "a*b"},
 		{name: "code-block", md: GetCodeBlock("fmt.Println(`x`)"), want: "fmt.Println(`x`)"},
-		{name: "code-block-lang", md: GetCodeBlockLang("go", "fmt.Println(`x`)"), want: "fmt.Println(`x`)"},
+		{name: "code-block-lang", md: GetCodeBlockLang("go", "fmt.Println(`x`)"), want: "fmt.Println(`x`) (go)"},
 		{name: "spoiler", md: GetSpoiler("a*b"), want: "a*b"},
 		{name: "underline", md: GetUnderline("a*b"), want: "a*b"},
 		{name: "strike", md: GetStrike("a*b"), want: "a*b"},
-		{name: "hyperlink", md: GetHyperLink("click", "https://example.com"), want: "click"},
-		{name: "mention", md: GetUserMention("user", 42), want: "user"},
+		{name: "hyperlink", md: GetHyperLink("click", "https://example.com"), want: "click (https://example.com)"},
+		{name: "mention", md: GetUserMention("user", 42), want: "user (42)"},
 		{name: "mixed-builder", md: GetNormal("hello ").Append(GetBold("world")).Spoiler("!"), want: "hello world!"},
 	}
 
