@@ -1,5 +1,7 @@
 package mdparser
 
+import "strings"
+
 // AddSecret adds a new secret variable to the mdparser *globally*.
 // from now on, the library itself will automatically censor all of the
 // "value"s with their name.
@@ -68,4 +70,15 @@ func SecretValueExists(value string) bool {
 	defer secretMu.RUnlock()
 
 	return getSecretIndexByValue(value) != -1
+}
+
+func checkSecrets(value string) string {
+	secretMu.RLock()
+	defer secretMu.RUnlock()
+
+	for _, current := range secrets {
+		value = strings.ReplaceAll(value, current.value, current.name)
+	}
+
+	return value
 }

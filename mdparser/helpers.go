@@ -14,12 +14,8 @@ func GetEmpty() WMarkDown {
 	return &wotoMarkDown{}
 }
 
-func GetNormal(text string) WMarkDown {
-	if text == "" {
-		return GetEmpty()
-	}
-
-	return newWotoMD(newTextSegment(segmentNormal, text))
+func GetNormal(values ...any) WMarkDown {
+	return newFormattedMarkdown(segmentNormal, values...)
 }
 
 func toNormal(value string) string {
@@ -30,48 +26,16 @@ func toNormal(value string) string {
 	return repairValue(value)
 }
 
-func GetBold(text string) WMarkDown {
-	if text == "" {
-		return GetEmpty()
-	}
-
-	return newWotoMD(newTextSegment(segmentBold, text))
+func GetBold(values ...any) WMarkDown {
+	return newFormattedMarkdown(segmentBold, values...)
 }
 
-func toBold(value string) string {
-	if value == "" {
-		return ""
-	}
-
-	return "*" + repairValue(value) + "*"
+func GetItalic(values ...any) WMarkDown {
+	return newFormattedMarkdown(segmentItalic, values...)
 }
 
-func GetItalic(text string) WMarkDown {
-	if text == "" {
-		return GetEmpty()
-	}
-
-	return newWotoMD(newTextSegment(segmentItalic, text))
-}
-
-func toItalic(value string) string {
-	return "_" + repairValue(value) + "_"
-}
-
-func GetMono(text string) WMarkDown {
-	if text == "" {
-		return GetEmpty()
-	}
-
-	return newWotoMD(newTextSegment(segmentMono, text))
-}
-
-func toMono(value string) string {
-	if value == "" {
-		return ""
-	}
-
-	return "`" + repairValue(value) + "`"
+func GetMono(values ...any) WMarkDown {
+	return newFormattedMarkdown(segmentMono, values...)
 }
 
 func GetStyled(text string, styles ...TextStyle) WMarkDown {
@@ -82,20 +46,8 @@ func GetStyled(text string, styles ...TextStyle) WMarkDown {
 	return newWotoMD(newStyledSegment(text, styles...))
 }
 
-func GetCodeBlock(text string) WMarkDown {
-	if text == "" {
-		return GetEmpty()
-	}
-
-	return newWotoMD(newTextSegment(segmentCodeBlock, text))
-}
-
-func toCodeBlock(value string) string {
-	if value == "" {
-		return ""
-	}
-
-	return markdownCodeFence + "\n" + repairCodeValue(value) + "\n" + markdownCodeFence
+func GetCodeBlock(values ...any) WMarkDown {
+	return newFormattedMarkdown(segmentCodeBlock, values...)
 }
 
 func GetCodeBlockLang(lang, text string) WMarkDown {
@@ -106,65 +58,16 @@ func GetCodeBlockLang(lang, text string) WMarkDown {
 	return newWotoMD(newCodeBlockLangSegment(lang, text))
 }
 
-func toCodeBlockLang(lang, value string) string {
-	if value == "" {
-		return ""
-	}
-
-	lang = normalizeCodeLanguage(lang)
-	if lang == "" {
-		return toCodeBlock(value)
-	}
-
-	return markdownCodeFence + lang + "\n" + repairCodeValue(value) + "\n" + markdownCodeFence
+func GetSpoiler(values ...any) WMarkDown {
+	return newFormattedMarkdown(segmentSpoiler, values...)
 }
 
-func GetSpoiler(text string) WMarkDown {
-	if text == "" {
-		return GetEmpty()
-	}
-
-	return newWotoMD(newTextSegment(segmentSpoiler, text))
+func GetUnderline(values ...any) WMarkDown {
+	return newFormattedMarkdown(segmentUnderline, values...)
 }
 
-func toSpoiler(value string) string {
-	if value == "" {
-		return ""
-	}
-
-	return "||" + repairValue(value) + "||"
-}
-
-func GetUnderline(text string) WMarkDown {
-	if text == "" {
-		return GetEmpty()
-	}
-
-	return newWotoMD(newTextSegment(segmentUnderline, text))
-}
-
-func toUnderline(value string) string {
-	if value == "" {
-		return ""
-	}
-
-	return "__" + repairValue(value) + "__"
-}
-
-func GetStrike(text string) WMarkDown {
-	if text == "" {
-		return GetEmpty()
-	}
-
-	return newWotoMD(newTextSegment(segmentStrike, text))
-}
-
-func toStrike(value string) string {
-	if value == "" {
-		return ""
-	}
-
-	return "~" + repairValue(value) + "~"
+func GetStrike(values ...any) WMarkDown {
+	return newFormattedMarkdown(segmentStrike, values...)
 }
 
 func GetHyperLink(text string, url string) WMarkDown {
@@ -191,16 +94,13 @@ func GetUserMention(text string, userID int64) WMarkDown {
 	return newWotoMD(newMentionSegment(text, userID))
 }
 
-func IsSpecial(r rune) bool {
-	return strings.ContainsRune(specialChars, r)
+func newFormattedMarkdown(kind markdownSegmentKind, values ...any) WMarkDown {
+	md := &wotoMarkDown{}
+	return md.appendFormattedText(kind, values...)
 }
 
-func toWotoMD(text string) WMarkDown {
-	if text == "" {
-		return nil
-	}
-
-	return newWotoMD(newRawSegment(text))
+func IsSpecial(r rune) bool {
+	return strings.ContainsRune(specialChars, r)
 }
 
 func repairValue(value string) string {
@@ -461,15 +361,4 @@ func appendRenderedSegment(builder *strings.Builder, segment markdownSegment) {
 		builder.WriteString(segment.meta)
 		builder.WriteByte(')')
 	}
-}
-
-func checkSecrets(value string) string {
-	secretMu.RLock()
-	defer secretMu.RUnlock()
-
-	for _, current := range secrets {
-		value = strings.ReplaceAll(value, current.value, current.name)
-	}
-
-	return value
 }

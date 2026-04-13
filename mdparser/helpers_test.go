@@ -166,6 +166,70 @@ func TestFormattingConstructors(t *testing.T) {
 	}
 }
 
+func TestFormattingConstructorsAcceptMixedValues(t *testing.T) {
+	cases := []struct {
+		name string
+		got  string
+		want string
+	}{
+		{name: "normal-sprintf", got: GetNormal("value=%d/%s", 7, "x").ToString(), want: "value\\=7/x"},
+		{name: "bold-mixed-values", got: GetBold("hello", " ", 42).ToString(), want: "*hello 42*"},
+		{name: "italic-appends-markdown-between-text-chunks", got: GetItalic("hello ", GetBold("world"), "!", 7).ToString(), want: "_hello _*world*_\\!7_"},
+		{name: "mono-skips-typed-nil-markdown", got: func() string {
+			var typedNil *wotoMarkDown
+			return GetMono("x", typedNil, "y").ToString()
+		}(), want: "`x``y`"},
+		{name: "code-block-sprintf", got: GetCodeBlock("fmt.Println(%d)", 42).ToString(), want: "```\nfmt.Println(42)\n```"},
+		{name: "spoiler-appends-markdown", got: GetSpoiler("pre", GetUnderline("mid"), "post").ToString(), want: "||pre||__mid__||post||"},
+		{name: "underline-stringifies-non-string-values", got: GetUnderline(true, 9).ToString(), want: "__true 9__"},
+		{name: "strike-sprintf", got: GetStrike("sum=%d", 12).ToString(), want: "~sum\\=12~"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.got != tc.want {
+				t.Fatalf("%s = %q, want %q", tc.name, tc.got, tc.want)
+			}
+		})
+	}
+}
+
+func TestFormattingConstructorsKeepEmptyResultForEmptyOrInvalidInput(t *testing.T) {
+	cases := []struct {
+		name string
+		got  string
+	}{
+		{name: "normal-no-args", got: GetNormal().ToString()},
+		{name: "normal-empty", got: GetNormal("").ToString()},
+		{name: "bold-no-args", got: GetBold().ToString()},
+		{name: "bold-empty", got: GetBold("").ToString()},
+		{name: "italic-no-args", got: GetItalic().ToString()},
+		{name: "italic-empty", got: GetItalic("").ToString()},
+		{name: "mono-no-args", got: GetMono().ToString()},
+		{name: "mono-empty", got: GetMono("").ToString()},
+		{name: "code-block-no-args", got: GetCodeBlock().ToString()},
+		{name: "code-block-empty", got: GetCodeBlock("").ToString()},
+		{name: "spoiler-no-args", got: GetSpoiler().ToString()},
+		{name: "spoiler-empty", got: GetSpoiler("").ToString()},
+		{name: "underline-no-args", got: GetUnderline().ToString()},
+		{name: "underline-empty", got: GetUnderline("").ToString()},
+		{name: "strike-no-args", got: GetStrike().ToString()},
+		{name: "strike-empty", got: GetStrike("").ToString()},
+		{name: "typed-nil-markdown", got: func() string {
+			var typedNil *wotoMarkDown
+			return GetBold(typedNil).ToString()
+		}()},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.got != "" {
+				t.Fatalf("%s = %q, want empty string", tc.name, tc.got)
+			}
+		})
+	}
+}
+
 func TestIsSpecial(t *testing.T) {
 	if !IsSpecial('*') {
 		t.Fatal("expected '*' to be special")
@@ -177,42 +241,6 @@ func TestIsSpecial(t *testing.T) {
 
 	if IsSpecial('a') {
 		t.Fatal("expected 'a' to be non-special")
-	}
-}
-
-func TestToWotoMD(t *testing.T) {
-	if got := toWotoMD(""); got != nil {
-		t.Fatalf("toWotoMD(\"\") = %#v, want nil", got)
-	}
-
-	if got := toWotoMD("value"); got == nil || got.ToString() != "value" {
-		t.Fatalf("toWotoMD(\"value\") = %#v, want markdown with value", got)
-	}
-}
-
-func TestInternalFormattingHelpersWithEmptyInput(t *testing.T) {
-	cases := []struct {
-		name string
-		got  string
-		want string
-	}{
-		{name: "toNormal", got: toNormal(""), want: ""},
-		{name: "toBold", got: toBold(""), want: ""},
-		{name: "toItalic", got: toItalic(""), want: "__"},
-		{name: "toMono", got: toMono(""), want: ""},
-		{name: "toCodeBlock", got: toCodeBlock(""), want: ""},
-		{name: "toCodeBlockLang", got: toCodeBlockLang("go", ""), want: ""},
-		{name: "toSpoiler", got: toSpoiler(""), want: ""},
-		{name: "toUnderline", got: toUnderline(""), want: ""},
-		{name: "toStrike", got: toStrike(""), want: ""},
-	}
-
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			if tc.got != tc.want {
-				t.Fatalf("%s = %q, want %q", tc.name, tc.got, tc.want)
-			}
-		})
 	}
 }
 
