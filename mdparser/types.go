@@ -25,18 +25,18 @@ type WMarkDown interface {
 	// ReplaceToNewN replaces up to n matching plain-text fragments with escaped plain-text replacements.
 	ReplaceToNewN(text1, text2 string, n int) WMarkDown
 
-	// Normal appends plain escaped text.
-	Normal(text string) WMarkDown
-	// Bold appends bold markdown text.
-	Bold(text string) WMarkDown
-	// Italic appends italic markdown text.
-	Italic(text string) WMarkDown
-	// Mono appends inline code wrapped in single backticks.
-	Mono(text string) WMarkDown
+	// Normal appends plain escaped text built from mixed values.
+	Normal(values ...any) WMarkDown
+	// Bold appends bold markdown text built from mixed values.
+	Bold(values ...any) WMarkDown
+	// Italic appends italic markdown text built from mixed values.
+	Italic(values ...any) WMarkDown
+	// Mono appends inline code wrapped in single backticks built from mixed values.
+	Mono(values ...any) WMarkDown
 	// Styled appends text wrapped in one or more nestable text styles.
 	Styled(text string, styles ...TextStyle) WMarkDown
-	// CodeBlock appends a fenced code block.
-	CodeBlock(text string) WMarkDown
+	// CodeBlock appends a fenced code block built from mixed values.
+	CodeBlock(values ...any) WMarkDown
 	// CodeBlockLang appends a fenced code block with a language hint.
 	CodeBlockLang(lang, text string) WMarkDown
 	// HyperLink appends a markdown hyperlink.
@@ -47,12 +47,12 @@ type WMarkDown interface {
 	Mention(text string, id int64) WMarkDown
 	// UserMention appends a Telegram user mention.
 	UserMention(text string, id int64) WMarkDown
-	// Spoiler appends spoiler markdown.
-	Spoiler(text string) WMarkDown
-	// Strike appends strike-through markdown.
-	Strike(text string) WMarkDown
-	// Underline appends underline markdown.
-	Underline(text string) WMarkDown
+	// Spoiler appends spoiler markdown built from mixed values.
+	Spoiler(values ...any) WMarkDown
+	// Strike appends strike-through markdown built from mixed values.
+	Strike(values ...any) WMarkDown
+	// Underline appends underline markdown built from mixed values.
+	Underline(values ...any) WMarkDown
 
 	// El appends a newline.
 	El() WMarkDown

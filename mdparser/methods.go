@@ -6,12 +6,14 @@
 package mdparser
 
 import (
+	"fmt"
+	"reflect"
 	"strings"
 )
 
 func (m *wotoMarkDown) Append(v WMarkDown) WMarkDown {
-	if v == nil {
-		return nil
+	if isNilValue(v) {
+		return m
 	}
 
 	if md, ok := v.(*wotoMarkDown); ok {
@@ -45,20 +47,20 @@ func (m *wotoMarkDown) ToString() string {
 	return renderSegments(m._segments)
 }
 
-func (m *wotoMarkDown) Normal(text string) WMarkDown {
-	return m.appendTextSegment(segmentNormal, text)
+func (m *wotoMarkDown) Normal(values ...any) WMarkDown {
+	return m.appendFormattedText(segmentNormal, values...)
 }
 
-func (m *wotoMarkDown) Bold(text string) WMarkDown {
-	return m.appendTextSegment(segmentBold, text)
+func (m *wotoMarkDown) Bold(values ...any) WMarkDown {
+	return m.appendFormattedText(segmentBold, values...)
 }
 
-func (m *wotoMarkDown) Italic(text string) WMarkDown {
-	return m.appendTextSegment(segmentItalic, text)
+func (m *wotoMarkDown) Italic(values ...any) WMarkDown {
+	return m.appendFormattedText(segmentItalic, values...)
 }
 
-func (m *wotoMarkDown) Mono(text string) WMarkDown {
-	return m.appendTextSegment(segmentMono, text)
+func (m *wotoMarkDown) Mono(values ...any) WMarkDown {
+	return m.appendFormattedText(segmentMono, values...)
 }
 
 func (m *wotoMarkDown) Styled(text string, styles ...TextStyle) WMarkDown {
@@ -69,8 +71,8 @@ func (m *wotoMarkDown) Styled(text string, styles ...TextStyle) WMarkDown {
 	return m.appendSegment(newStyledSegment(text, styles...))
 }
 
-func (m *wotoMarkDown) CodeBlock(text string) WMarkDown {
-	return m.appendTextSegment(segmentCodeBlock, text)
+func (m *wotoMarkDown) CodeBlock(values ...any) WMarkDown {
+	return m.appendFormattedText(segmentCodeBlock, values...)
 }
 
 func (m *wotoMarkDown) CodeBlockLang(lang, text string) WMarkDown {
@@ -81,12 +83,12 @@ func (m *wotoMarkDown) CodeBlockLang(lang, text string) WMarkDown {
 	return m.appendSegment(newCodeBlockLangSegment(lang, text))
 }
 
-func (m *wotoMarkDown) Strike(text string) WMarkDown {
-	return m.appendTextSegment(segmentStrike, text)
+func (m *wotoMarkDown) Strike(values ...any) WMarkDown {
+	return m.appendFormattedText(segmentStrike, values...)
 }
 
-func (m *wotoMarkDown) Underline(text string) WMarkDown {
-	return m.appendTextSegment(segmentUnderline, text)
+func (m *wotoMarkDown) Underline(values ...any) WMarkDown {
+	return m.appendFormattedText(segmentUnderline, values...)
 }
 
 func (m *wotoMarkDown) HyperLink(text, url string) WMarkDown {
@@ -107,8 +109,8 @@ func (m *wotoMarkDown) UserMention(text string, id int64) WMarkDown {
 	return m.appendMentionSegment(text, id)
 }
 
-func (m *wotoMarkDown) Spoiler(text string) WMarkDown {
-	return m.appendTextSegment(segmentSpoiler, text)
+func (m *wotoMarkDown) Spoiler(values ...any) WMarkDown {
+	return m.appendFormattedText(segmentSpoiler, values...)
 }
 
 // El method appends a new line (End-line) to the markdown value.
@@ -156,6 +158,39 @@ func (m *wotoMarkDown) appendTextSegment(kind markdownSegmentKind, text string) 
 	return m.appendSegment(newTextSegment(kind, text))
 }
 
+func (m *wotoMarkDown) appendFormattedText(kind markdownSegmentKind, values ...any) WMarkDown {
+	if len(values) == 0 {
+		return m
+	}
+
+	flush := func(chunk []any) WMarkDown {
+		if len(chunk) == 0 {
+			return m
+		}
+
+		return m.appendTextSegment(kind, formatMarkdownValues(chunk))
+	}
+
+	var chunk []any
+	for _, current := range values {
+		if md, ok := asMarkdownValue(current); ok {
+			flush(chunk)
+			chunk = chunk[:0]
+
+			if md == nil {
+				continue
+			}
+
+			m.Append(md)
+			continue
+		}
+
+		chunk = append(chunk, current)
+	}
+
+	return flush(chunk)
+}
+
 func (m *wotoMarkDown) appendPairSegment(text, extra string, factory func(string, string) markdownSegment) WMarkDown {
 	if text == "" || extra == "" {
 		return m
@@ -181,4 +216,44 @@ func (m *wotoMarkDown) replaceRendered(oldValue, newValue string, n int) WMarkDo
 
 	m._segments = []markdownSegment{newRawSegment(rendered)}
 	return m
+}
+
+func formatMarkdownValues(values []any) string {
+	if len(values) == 0 {
+		return ""
+	}
+
+	format, ok := values[0].(string)
+	if ok && strings.Contains(format, "%") {
+		return fmt.Sprintf(format, values[1:]...)
+	}
+
+	return fmt.Sprint(values...)
+}
+
+func asMarkdownValue(value any) (WMarkDown, bool) {
+	md, ok := value.(WMarkDown)
+	if !ok {
+		return nil, false
+	}
+
+	if isNilValue(md) {
+		return nil, true
+	}
+
+	return md, true
+}
+
+func isNilValue(value any) bool {
+	if value == nil {
+		return true
+	}
+
+	current := reflect.ValueOf(value)
+	switch current.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Pointer, reflect.Slice:
+		return current.IsNil()
+	default:
+		return false
+	}
 }

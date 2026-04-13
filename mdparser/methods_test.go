@@ -147,15 +147,23 @@ func TestFormattingMethodsKeepReceiverForEmptyOrInvalidInput(t *testing.T) {
 		name string
 		call func(*wotoMarkDown) WMarkDown
 	}{
+		{name: "normal-no-args", call: func(m *wotoMarkDown) WMarkDown { return m.Normal() }},
 		{name: "normal-empty", call: func(m *wotoMarkDown) WMarkDown { return m.Normal("") }},
+		{name: "bold-no-args", call: func(m *wotoMarkDown) WMarkDown { return m.Bold() }},
 		{name: "bold-empty", call: func(m *wotoMarkDown) WMarkDown { return m.Bold("") }},
+		{name: "italic-no-args", call: func(m *wotoMarkDown) WMarkDown { return m.Italic() }},
 		{name: "italic-empty", call: func(m *wotoMarkDown) WMarkDown { return m.Italic("") }},
+		{name: "mono-no-args", call: func(m *wotoMarkDown) WMarkDown { return m.Mono() }},
 		{name: "mono-empty", call: func(m *wotoMarkDown) WMarkDown { return m.Mono("") }},
 		{name: "styled-empty-text", call: func(m *wotoMarkDown) WMarkDown { return m.Styled("", StyleBold, StyleItalic) }},
+		{name: "code-block-no-args", call: func(m *wotoMarkDown) WMarkDown { return m.CodeBlock() }},
 		{name: "code-block-empty", call: func(m *wotoMarkDown) WMarkDown { return m.CodeBlock("") }},
 		{name: "code-block-lang-empty-text", call: func(m *wotoMarkDown) WMarkDown { return m.CodeBlockLang("go", "") }},
+		{name: "underline-no-args", call: func(m *wotoMarkDown) WMarkDown { return m.Underline() }},
 		{name: "underline-empty", call: func(m *wotoMarkDown) WMarkDown { return m.Underline("") }},
+		{name: "strike-no-args", call: func(m *wotoMarkDown) WMarkDown { return m.Strike() }},
 		{name: "strike-empty", call: func(m *wotoMarkDown) WMarkDown { return m.Strike("") }},
+		{name: "spoiler-no-args", call: func(m *wotoMarkDown) WMarkDown { return m.Spoiler() }},
 		{name: "spoiler-empty", call: func(m *wotoMarkDown) WMarkDown { return m.Spoiler("") }},
 		{name: "hyperlink-empty-text", call: func(m *wotoMarkDown) WMarkDown { return m.HyperLink("", "https://example.com") }},
 		{name: "hyperlink-empty-url", call: func(m *wotoMarkDown) WMarkDown { return m.HyperLink("text", "") }},
@@ -182,12 +190,94 @@ func TestFormattingMethodsKeepReceiverForEmptyOrInvalidInput(t *testing.T) {
 func TestAppendKeepsReceiverOnNilMarkdown(t *testing.T) {
 	base := GetNormal("hello").(*wotoMarkDown)
 
-	if got := base.Append(nil); got != nil {
-		t.Fatalf("Append(nil) = %#v, want nil", got)
+	if got := base.Append(nil); got != base {
+		t.Fatalf("Append(nil) = %#v, want receiver", got)
 	}
 
 	if base.ToString() != "hello" {
 		t.Fatalf("base changed to %q, want %q", base.ToString(), "hello")
+	}
+}
+
+func TestAppendHandlesTypedNilMarkdown(t *testing.T) {
+	base := GetNormal("hello").(*wotoMarkDown)
+
+	var typedNil *wotoMarkDown
+	if got := base.Append(typedNil); got != base {
+		t.Fatalf("Append(typed nil) = %#v, want receiver", got)
+	}
+
+	if base.ToString() != "hello" {
+		t.Fatalf("base changed to %q, want %q", base.ToString(), "hello")
+	}
+}
+
+func TestFormattingMethodsAcceptMixedValues(t *testing.T) {
+	cases := []struct {
+		name string
+		call func(*wotoMarkDown) WMarkDown
+		want string
+	}{
+		{
+			name: "normal-sprintf",
+			call: func(m *wotoMarkDown) WMarkDown { return m.Normal("value=%d/%s", 7, "x") },
+			want: "basevalue\\=7/x",
+		},
+		{
+			name: "bold-mixed-values",
+			call: func(m *wotoMarkDown) WMarkDown { return m.Bold("hello", " ", 42) },
+			want: "base*hello 42*",
+		},
+		{
+			name: "italic-appends-markdown-between-text-chunks",
+			call: func(m *wotoMarkDown) WMarkDown {
+				return m.Italic("hello ", GetBold("world"), "!", 7)
+			},
+			want: "base_hello _*world*_\\!7_",
+		},
+		{
+			name: "mono-skips-typed-nil-markdown",
+			call: func(m *wotoMarkDown) WMarkDown {
+				var typedNil *wotoMarkDown
+				return m.Mono("x", typedNil, "y")
+			},
+			want: "base`x``y`",
+		},
+		{
+			name: "code-block-sprintf",
+			call: func(m *wotoMarkDown) WMarkDown { return m.CodeBlock("fmt.Println(%d)", 42) },
+			want: "base```\nfmt.Println(42)\n```",
+		},
+		{
+			name: "spoiler-appends-markdown",
+			call: func(m *wotoMarkDown) WMarkDown { return m.Spoiler("pre", GetUnderline("mid"), "post") },
+			want: "base||pre||__mid__||post||",
+		},
+		{
+			name: "underline-stringifies-non-string-values",
+			call: func(m *wotoMarkDown) WMarkDown { return m.Underline(true, 9) },
+			want: "base__true 9__",
+		},
+		{
+			name: "strike-sprintf",
+			call: func(m *wotoMarkDown) WMarkDown { return m.Strike("sum=%d", 12) },
+			want: "base~sum\\=12~",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			base := GetNormal("base").(*wotoMarkDown)
+			got := tc.call(base)
+
+			if got != base {
+				t.Fatal("expected formatting method to return the receiver")
+			}
+
+			if base.ToString() != tc.want {
+				t.Fatalf("%s = %q, want %q", tc.name, base.ToString(), tc.want)
+			}
+		})
 	}
 }
 
